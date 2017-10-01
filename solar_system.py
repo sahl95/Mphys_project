@@ -129,7 +129,7 @@ class solar_System():
     def find_all_scaling_factor_and_phase(self, eigenvectors_of_A, eigenvectors_of_B):
         x, y = eigenvectors_of_A, eigenvectors_of_B
 
-        init_conditions = np.array(star_system.initial_conditions())
+        init_conditions = np.array(self.initial_conditions())
         h_solved = self.solve_property(x, init_conditions[0, :])
         k_solved = self.solve_property(x, init_conditions[1, :])
         p_solved = self.solve_property(y, init_conditions[2, :])
@@ -148,7 +148,7 @@ class solar_System():
             S[i], beta[i] = fsolve(scaling_factor_and_phase, (1, -1), args=(h_solved[i], k_solved[i],))
             T[i], gamma[i] = fsolve(scaling_factor_and_phase, (-1, 1), args=(p_solved[i], q_solved[i],))
 
-        return S, beta, T, gamma
+        return S, beta*180/np.pi, T, gamma
 
     def eq_of_motion(self, scaled_eigenvector, eigenvalue, phase, t, eq_id):
         # eq_id = 'h', 'k', 'p', 'q'
@@ -208,10 +208,6 @@ class solar_System():
 
     def get_eccentricity(self, scaled_eigenvector_of_A, eigenvalue_of_A, beta, t):
         n = len(self.planets)
-        e = scaled_eigenvector_of_A
-        beta *= 180/np.pi
-        g = eigenvalue_of_A
-
         kwargs = {'scaled_eigenvector' : scaled_eigenvector_of_A, 'eigenvalue' : eigenvalue_of_A, 'phase' : beta,
                   't' : t}
         eccentricities = []
@@ -222,10 +218,6 @@ class solar_System():
 
     def get_inclination(self, scaled_eigenvector_of_B, eigenvalue_of_B, gamma, t):
         n = len(self.planets)
-        I = scaled_eigenvector_of_B
-        gamma *= 180/np.pi
-        f = eigenvalue_of_B
-
         kwargs = {'scaled_eigenvector' : scaled_eigenvector_of_B, 'eigenvalue' : eigenvalue_of_B, 'phase' : gamma,
                   't' : t}
         inclinations = []
@@ -237,21 +229,34 @@ class solar_System():
     def get_perihelion_precession_rates(self, A, eccentricities, h_list, k_list):
         n = len(self.planets)
         d_pidot_dt_list = []
-        masks = []
 
         for j in range(n):
-            h_dot_j = A[j, j]*k_list[j]
-            k_dot_j = -A[j, j]*h_list[j]
-
+            h_dot_j, k_dot_j = 0, 0
             for i in range(n):
-                if i != j:
-                    h_dot_j += A[j, i]*k_list[i]
-                    k_dot_j -= A[j, i]*h_list[i]
+                h_dot_j += A[j, i]*k_list[i]
+                k_dot_j -= A[j, i]*h_list[i]
             pidot_j = 3600*(k_list[j]*h_dot_j - h_list[j]*k_dot_j)/(eccentricities[j])**2
             # pidot_j = ma.masked_array(pidot_j, np.abs(pidot_j)>10).filled(0)
 
             d_pidot_dt_list.append(pidot_j)
         return d_pidot_dt_list
+
+    def alt_perihelion_precession_rates(self, A, eccentricities, h_list, k_list):
+        # uses eq 7.16. Can use either arcsin(h/e), arccos(k/e), or arctan(h/k). Former 2 are identical
+        n = len(self.planets)
+        d_pidot_dt_list = []
+
+        for j in range(n):
+            pi_j = np.arcsin(h_list[j]/eccentricities[j])
+            pidot = A[j, j]*eccentricities[j]
+            for i in range(n):
+                if i != j:
+                    pi_i = np.arcsin(h_list[i]/eccentricities[i])
+                    pidot += A[j, i]*eccentricities[i]*np.cos(pi_j-pi_i)
+                    # pidot += A[j, i]*eccentricities[i]*(np.cos(pi_j-pi_i)-(h_list[j]/k_list[j]*np.sin(pi_j-pi_i)))
+            d_pidot_dt_list.append(3600*pidot/eccentricities[j])
+        return d_pidot_dt_list
+
 
     def get_ascending_node_precession_rates(self, B, inclinations, p_list, q_list):
         n = len(self.planets)
@@ -273,7 +278,7 @@ class solar_System():
         return d_Omega_dt_list
 
     def simulate(self, t, plot=False, separate=True):
-        A, B = [star_system.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12)) for mat_id in ['A', 'B']]
+        A, B = [self.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12)) for mat_id in ['A', 'B']]
         # print('\n', A, B)
         g, x, f, y = *np.linalg.eig(A), *np.linalg.eig(B)
         S, beta, T, gamma = self.find_all_scaling_factor_and_phase(x, y)
@@ -306,12 +311,12 @@ class solar_System():
         plot_eccentricity(t, eccentricities[idx], names[idx])
 
         for idx in range(len(precession_rates)):
-            # print('Precession rate of {} = {:.2f} arcseconds per century'.format(names[idx],
-            #       np.mean(precession_rates[idx])*100))
+            print('Precession rate of {} = {:.2f} arcseconds per year'.format(names[idx],
+                  np.mean(precession_rates[idx])))
             # print('Eccentricity of {} = {:.2f}'.format(names[idx],
             #       np.mean(eccentricities[idx])))
-            print('Inclination of {} = {:.2f} degrees'.format(names[idx],
-                  np.mean(inclinations[idx])*180/np.pi))
+            # print('Inclination of {} = {:.2f} degrees'.format(names[idx],
+            #       np.mean(inclinations[idx])*180/np.pi))
             
 
         return eccentricities, inclinations
