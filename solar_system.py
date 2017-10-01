@@ -253,6 +253,25 @@ class solar_System():
             d_pidot_dt_list.append(pidot_j)
         return d_pidot_dt_list
 
+    def get_ascending_node_precession_rates(self, B, inclinations, p_list, q_list):
+        n = len(self.planets)
+        d_Omega_dt_list = []
+        masks = []
+
+        for j in range(n):
+            p_dot_j = B[j, j]*q_list[j]
+            q_dot_j = -B[j, j]*p_list[j]
+
+            for i in range(n):
+                if i != j:
+                    p_dot_j += B[j, i]*q_list[i]
+                    q_dot_j -= B[j, i]*p_list[i]
+            pidot_j = 3600*((q_list[j]*p_dot_j - p_list[j]*q_dot_j)/(inclinations[j])**2)
+            # pidot_j = ma.masked_array(pidot_j, np.abs(pidot_j)>10).filled(0)
+
+            d_Omega_dt_list.append(pidot_j)
+        return d_Omega_dt_list
+
     def simulate(self, t, plot=False, separate=True):
         A, B = [star_system.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12)) for mat_id in ['A', 'B']]
         # print('\n', A, B)
@@ -260,7 +279,7 @@ class solar_System():
         S, beta, T, gamma = self.find_all_scaling_factor_and_phase(x, y)
 
         eccentricities = self.get_eccentricity(S*x, g, beta, t)
-        inclinations = self.get_inclination(T*y, f, gamma, t)*180/np.pi
+        inclinations = self.get_inclination(T*y, f, gamma, t)
         names = [self.planets[p].name for p in range(len(self.planets))]
         if plot:
             if separate:
@@ -268,27 +287,32 @@ class solar_System():
                 plot_simulation_separate(t/10**6, inclinations, 'Time (Myr)', 'Inclination', names)
             else:
                 plot_simulation_all(t/10**6, eccentricities, 'Time (Myr)', 'Eccentricity', names)
-                plot_simulation_all(t/10**6, inclinations, 'Time (Myr)', 'Inclination', names)
+                plot_simulation_all(t/10**6, inclinations*180/np.pi, 'Time (Myr)', 'Inclination', names)
 
         kwargs = {'scaled_eigenvector' : S*x, 'eigenvalue' : g, 'phase' : beta,
                   't' : t}
         h_list = self.eq_of_motion(**kwargs, eq_id='h')
         k_list = self.eq_of_motion(**kwargs, eq_id='k')
-        kwargs = {'scaled_eigenvector' : S*x, 'eigenvalue' : f, 'phase' : gamma,
+        kwargs = {'scaled_eigenvector' : T*y, 'eigenvalue' : f, 'phase' : gamma,
                     't' : t}
         p_list = self.eq_of_motion(**kwargs, eq_id='p')
         q_list = self.eq_of_motion(**kwargs, eq_id='q')
 
-        precession_rates = self.get_perihelion_precession_rates(A, eccentricities, h_list, k_list)
+        precession_rates, xlabel = self.get_perihelion_precession_rates(A, eccentricities, h_list, k_list), 'Pericenter'
+        # precession_rates, xlabel = self.get_ascending_node_precession_rates(B, inclinations, p_list, q_list), 'Ascending node'
 
         idx = 0
-        plot_precession_rate(t, precession_rates[idx], 'Mercury')
-        plot_eccentricity(t, eccentricities[idx], 'Mercury')
+        plot_precession_rate(t, precession_rates[idx], xlabel+r" precession rate [${}'{}'\ y^{-1}$]", names[idx])
+        plot_eccentricity(t, eccentricities[idx], names[idx])
 
-        names = [p.__dict__['name'] for p in self.planets]
         for idx in range(len(precession_rates)):
-            print('Precession rate of {} = {:.2f} arcseconds per century'.format(names[idx],
-                  np.mean(precession_rates[idx])*100))
+            # print('Precession rate of {} = {:.2f} arcseconds per century'.format(names[idx],
+            #       np.mean(precession_rates[idx])*100))
+            # print('Eccentricity of {} = {:.2f}'.format(names[idx],
+            #       np.mean(eccentricities[idx])))
+            print('Inclination of {} = {:.2f} degrees'.format(names[idx],
+                  np.mean(inclinations[idx])*180/np.pi))
+            
 
         return eccentricities, inclinations
 
@@ -316,14 +340,14 @@ def plot_simulation_all(t_data=None, y_data=None, xlabel="", ylabel="", data_lab
     for text in l.get_texts():
         text.set_color("white")
 
-def plot_precession_rate(t, precession_rate, label):
-    # precession_rates = self.get_nodal_precession_rates(B, inclinations, p_list, q_list)
+def plot_precession_rate(t, precession_rate, xlabel, label):
+    # precession_rates = self.get_ascending_node_precession_rates(B, inclinations, p_list, q_list)
     plt.figure()
-    plt.plot((t/10**6), precession_rate, 'b', linewidth=1, label=label)
+    plt.plot((t/10**6), precession_rate, 'b', label=label)
     # plt.axhline(5.462, 0, 1, color='k', linestyle='--')
     plt.axhline(np.mean(precession_rate), 0, 1, color='r', linestyle='--')
     plt.xlabel('Time (Myr)')
-    plt.ylabel(r"Precession rate [${}'{}'\ y^{-1}$]")
+    plt.ylabel(xlabel)
     plt.axis(xmin=t[0]/10**6, xmax=t[-1]/10**6)
     l = plt.legend(loc='upper left', bbox_to_anchor=(0., 1.0),
             ncol=3, fancybox=True, shadow=False, facecolor='black',
@@ -347,7 +371,7 @@ if __name__ == "__main__":
     star_system = solar_System(1., 1., 'solar_system.csv')
     # star_system.print_planets()
     # t = np.linspace(-5*10**6, 5*10**6, 15000)
-    t = np.linspace(-10*10**6, 10*10**6, 3000)
+    t = np.linspace(-10*10**6, 10*10**6, 30000)
     # t = np.linspace(-100000, 100000, 300)
     eccentricities, inclinations = star_system.simulate(t=t, plot=True, separate=False)
 
