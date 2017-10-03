@@ -15,6 +15,7 @@ R_SUN = 6.9551*10**8
 M_EARTH = 5.9726*10**24
 AU = 149597870700
 SECS_IN_YEAR = 365.25*24*3600
+G_CONST = 6.6738*10**(-11)
 
 def calculate_laplace_coeff(alpha, j, s):
     return integrate.quad(lambda psi, alpha, j, s: np.cos(j*psi)/(1-2*alpha*np.cos(psi)+alpha**2)**s,
@@ -319,7 +320,7 @@ class solar_System():
         ax.plot(x, y, z, 'b*', markersize=10, zorder=-999)
         # ax = fig.add_subplot(111)
         # ax.plot(0, 0, 'b*', markersize=10)
-        for idx in range(8):
+        for idx in range(9):
             X, Y, Z = self.kep2cart(eccentricities, inclinations, O, w, t, 0, idx)
             # ax.plot(X, Y, '.', markersize=2, label=names[idx])
             ax.plot(X, Y, Z, '.', markersize=2, label=names[idx], zorder=-idx)
@@ -358,31 +359,37 @@ class solar_System():
     def kep2cart(self, ecc, inc, O_list, w_list, time, t0, idx):
         n = self.get_property_all_planets('n')#/(SECS_IN_YEAR)*np.pi/180
         a = self.get_property_all_planets('a')
-        l = self.get_property_all_planets('l')#*np.pi/180
-        pi = self.get_property_all_planets('omega_bar')#*np.pi/180
+        l = self.get_property_all_planets('l')*np.pi/180
+        pi = self.get_property_all_planets('omega_bar')*np.pi/180
 
-        # idx = 7
-        M0 = pi[idx]-l[idx]
-        Mt = M0+n[idx]*(time-t0)#*SECS_IN_YEAR
-        Mt = 2*np.pi*(Mt-np.min(Mt))/(np.max(Mt)-np.min(Mt))
+        T = 2*np.pi*np.sqrt(((a[idx]*AU)**3)/(G_CONST*self.star_mass*M_SUN))/SECS_IN_YEAR
+        # print(T)
+
+        M0 = l[idx]-pi[idx]
+        Mt = 2*np.pi/T*(time-t0)
+        Mt = M0+2*np.pi*(Mt-np.min(Mt))/(np.max(Mt)-np.min(Mt))
+        # Mt = 2*np.pi*(Mt-np.min(Mt))/(np.max(Mt)-np.min(Mt))
+        # print(Mt[0:2])
 
         EA = []
         e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
         for t in range(len(time)):
             E = Mt[t]
             F = E-e[t]*np.sin(E)-Mt[t]
-            j, maxIter, delta = 0, 30, 0.0000001
+            j, maxIter, delta = 0, 30, 0.0000000001
             while (j < maxIter)*(np.abs(F) > delta):
                 E = E-F/(1-e[t]*np.cos(E))
                 F = E-e[t]*np.sin(E)-Mt[t]
                 j += 1
             EA.append(E)
-
         EA = np.array(EA)
         nu = np.arctan2(np.sqrt(1+e)*np.sin(EA/2), np.sqrt(1-e)*np.cos(EA/2))
 
+        # plt.figure()
+        # plt.plot(time, a[idx]*(1-e*np.cos(EA)))
         rc = a[idx]*(1-e*np.cos(EA))
-        print(a[idx], np.max(rc), np.min(rc), np.mean(rc))
+        # print(a[idx], np.max(rc), np.min(rc), np.mean(rc))
+        print('a: {}, {}\nr_max: {}, {}\nr_min {}, {}\n'.format(a[idx], np.mean(rc), a[idx]*(1+np.max(e)), np.max(rc), a[idx]*(1-np.min(e)), np.min(rc)))
 
         o_vec = np.array([rc*np.cos(nu), rc*np.sin(nu), 0])
 
