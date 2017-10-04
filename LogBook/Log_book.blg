@@ -1,0 +1,49 @@
+This is BibTeX, Version 0.99d (TeX Live 2014)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: Log_book.aux
+The style file: ieeetr.bst
+Database file #1: LogbookBib.bib
+Warning--empty publisher in ssd
+Warning--empty journal in PRMer
+You've used 2 entries,
+            1876 wiz_defined-function locations,
+            490 strings with 3996 characters,
+and the built_in function-call counts, 443 in all, are:
+= -- 41
+> -- 12
+< -- 0
++ -- 5
+- -- 3
+* -- 30
+:= -- 68
+add.period$ -- 3
+call.type$ -- 2
+change.case$ -- 1
+chr.to.int$ -- 0
+cite$ -- 4
+duplicate$ -- 23
+empty$ -- 45
+format.name$ -- 3
+if$ -- 106
+int.to.chr$ -- 0
+int.to.str$ -- 2
+missing$ -- 3
+newline$ -- 10
+num.names$ -- 2
+pop$ -- 10
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 14
+stack$ -- 0
+substring$ -- 20
+swap$ -- 7
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 2
+while$ -- 4
+width$ -- 3
+write$ -- 19
+(There were 2 warnings)
