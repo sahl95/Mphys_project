@@ -9,7 +9,7 @@
 \contentsline {subsection}{\numberline {3.2}Tests of simulation}{14}{subsection.3.2}
 \contentsline {subsubsection}{\numberline {3.2.1}Jupiter and Saturn}{14}{subsubsection.3.2.1}
 \contentsline {subsubsection}{\numberline {3.2.2}Whole Solar System}{15}{subsubsection.3.2.2}
-\contentsline {subsubsection}{\numberline {3.2.3}Precession of mercury}{16}{subsubsection.3.2.3}
-\contentsline {section}{\numberline {4}Week 4: October 1$^{st} - $8$^{th}$}{17}{section.4}
-\contentsline {subsection}{\numberline {4.1}Keplerian to Cartesian coordinates}{17}{subsection.4.1}
-\contentsline {section}{\numberline {5}Bibliography}{17}{section.5}
+\contentsline {subsubsection}{\numberline {3.2.3}Precession of mercury}{18}{subsubsection.3.2.3}
+\contentsline {section}{\numberline {4}Week 4: October 1$^{st} - $8$^{th}$}{20}{section.4}
+\contentsline {subsection}{\numberline {4.1}Keplerian to Cartesian coordinates}{20}{subsection.4.1}
+\contentsline {section}{\numberline {5}Bibliography}{21}{section.5}
