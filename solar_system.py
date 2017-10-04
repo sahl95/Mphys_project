@@ -244,21 +244,7 @@ class solar_System():
             d_pidot_dt_list.append(pidot_j)
         return d_pidot_dt_list
 
-    def alt_perihelion_precession_rates(self, A, eccentricities, h_list, k_list):
-        # uses eq 7.16. Can use either arcsin(h/e), arccos(k/e), or arctan(h/k). Former 2 are identical
-        n = len(self.planets)
-        d_pidot_dt_list = []
-
-        for j in range(n):
-            pi_j = np.arcsin(h_list[j]/eccentricities[j])
-            pidot = A[j, j]*eccentricities[j]
-            for i in range(n):
-                if i != j:
-                    pi_i = np.arcsin(h_list[i]/eccentricities[i])
-                    pidot += A[j, i]*eccentricities[i]*np.cos(pi_j-pi_i)
-                    # pidot += A[j, i]*eccentricities[i]*(np.cos(pi_j-pi_i)-(h_list[j]/k_list[j]*np.sin(pi_j-pi_i)))
-            d_pidot_dt_list.append(3600*pidot/eccentricities[j])
-        return d_pidot_dt_list
+    
 
 
     def get_ascending_node_precession_rates(self, B, inclinations, p_list, q_list):
@@ -283,12 +269,51 @@ class solar_System():
             pi_om.append(np.arctan2(hp[i], kq[i]))
         return np.array(pi_om)
 
-    def simulate(self, t, plot=False, separate=True):
+    def kep2cart(self, ecc, inc, O_list, w_list, time, t0, idx):
+        n = self.get_property_all_planets('n')#/(SECS_IN_YEAR)*np.pi/180
+        a = self.get_property_all_planets('a')
+        l = self.get_property_all_planets('l')*np.pi/180
+        pi = self.get_property_all_planets('omega_bar')*np.pi/180
+
+        T = 2*np.pi*np.sqrt(((a[idx]*AU)**3)/(G_CONST*self.star_mass*M_SUN))/SECS_IN_YEAR
+        # print(T)
+
+        M0 = l[idx]-pi[idx]
+        Mt = n[idx]*np.pi/180*(time-t0)
+
+        EA = []
+        e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
+        for t in range(len(time)):
+            E = Mt[t]
+            f_by_dfdE = (E-e[t]*np.sin(E)-Mt[t])/(1-e[t]*np.cos(E))
+            j, maxIter, delta = 0, 30, 0.0000000001
+            while (j < maxIter)*(np.abs(f_by_dfdE) > delta):
+                E = E-f_by_dfdE
+                f_by_dfdE = (E-e[t]*np.sin(E)-Mt[t])/(1-e[t]*np.cos(E))
+                j += 1
+            EA.append(E)
+        EA = np.array(EA)
+        nu = 2*np.arctan2(np.sqrt(1+e)*np.sin(EA/2), np.sqrt(1-e)*np.cos(EA/2))
+
+        rc = a[idx]*(1-e*np.cos(EA))
+        # print('a: {}, {}\nr_max: {}, {}\nr_min {}, {}\n'.format(a[idx], np.mean(rc), a[idx]*(1+np.max(e)), np.max(rc), a[idx]*(1-np.min(e)), np.min(rc)))
+
+        o_vec = np.array([rc*np.cos(nu), rc*np.sin(nu), 0])
+
+        rx = (o_vec[0]*(np.cos(w)*np.cos(O)-np.sin(w)*np.cos(i)*np.sin(O))-
+              o_vec[1]*(np.sin(w) * np.cos(O)+np.cos(w)*np.cos(i)*np.sin(O)))
+        ry = (o_vec[0]*(np.cos(w)*np.sin(O)+np.sin(w)*np.cos(i)*np.cos(O))+
+              o_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O)-np.sin(w)*np.sin(O)))
+        rz = (o_vec[0]*(np.sin(w) * np.sin(i)) + o_vec[1]*(np.cos(w)*np.sin(i)))
+
+        return rx, ry, rz
+
+    def simulate(self, t, plot_orbit=False, plot=False, separate=True):
         A, B = [self.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12)) for mat_id in ['A', 'B']]
         # print('\n', A, B)
         g, x, f, y = *np.linalg.eig(A), *np.linalg.eig(B)
         S, beta, T, gamma = self.find_all_scaling_factor_and_phase(x, y)
-        # print(f*3600, '\n')
+        print(g*100*3600, '\n')
 
         eccentricities = self.get_eccentricity(S*x, g, beta, t)
         inclinations = self.get_inclination(T*y, f, gamma, t)
@@ -314,20 +339,21 @@ class solar_System():
         O = self.get_pi_or_omega(p_list, q_list)
         w = O-self.get_pi_or_omega(h_list, k_list)
 
-        fig = plt.figure(figsize=(6, 6))
-        ax = fig.add_subplot(111, projection='3d')
-        x, y, z = np.zeros(2), np.zeros(2), np.zeros(2)
-        ax.plot(x, y, z, 'b*', markersize=10, zorder=-999)
-        # ax = fig.add_subplot(111)
-        # ax.plot(0, 0, 'b*', markersize=10)
-        for idx in range(9):
-            X, Y, Z = self.kep2cart(eccentricities, inclinations, O, w, t, 0, idx)
-            # ax.plot(X, Y, '.', markersize=2, label=names[idx])
-            ax.plot(X, Y, Z, '.', markersize=2, label=names[idx], zorder=-idx)
-            ax.set_zlim(-np.max(Y), np.max(Y))
-            ax.set_zlabel('z (AU)')
-            plt.xlabel('x (AU)')
-            plt.ylabel('y (AU)')
+        if plot_orbit:
+            x, y, z = np.zeros(2), np.zeros(2), np.zeros(2)
+            fig = plt.figure(figsize=(6, 6))
+            ax = fig.add_subplot(111, projection='3d')
+            ax.plot(x, y, z, 'b*', markersize=3, zorder=-999)
+            # ax = fig.add_subplot(111)
+            # ax.plot(0, 0, 'b*', markersize=3)
+            for idx in range(9):
+                X, Y, Z = self.kep2cart(eccentricities, inclinations, O, w, t, 0, idx)
+                # ax.plot(X, Y, '.', markersize=2, label=names[idx])
+                ax.plot(X, Y, Z, '.', markersize=2, label=names[idx], zorder=-idx)
+                ax.set_zlim(-np.max([np.max(X), np.max(Y)]), np.max([np.max(X), np.max(Y)]))
+                ax.set_zlabel('z (AU)')
+                plt.xlabel('x (AU)')
+                plt.ylabel('y (AU)')
             # print(np.mean(np.sqrt(X**2+Y**2+Z**2)))
             
             # plt.legend()
@@ -356,50 +382,7 @@ class solar_System():
 
         return eccentricities, inclinations
     
-    def kep2cart(self, ecc, inc, O_list, w_list, time, t0, idx):
-        n = self.get_property_all_planets('n')#/(SECS_IN_YEAR)*np.pi/180
-        a = self.get_property_all_planets('a')
-        l = self.get_property_all_planets('l')*np.pi/180
-        pi = self.get_property_all_planets('omega_bar')*np.pi/180
-
-        T = 2*np.pi*np.sqrt(((a[idx]*AU)**3)/(G_CONST*self.star_mass*M_SUN))/SECS_IN_YEAR
-        # print(T)
-
-        M0 = l[idx]-pi[idx]
-        Mt = 2*np.pi/T*(time-t0)
-        Mt = M0+2*np.pi*(Mt-np.min(Mt))/(np.max(Mt)-np.min(Mt))
-        # Mt = 2*np.pi*(Mt-np.min(Mt))/(np.max(Mt)-np.min(Mt))
-        # print(Mt[0:2])
-
-        EA = []
-        e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
-        for t in range(len(time)):
-            E = Mt[t]
-            F = E-e[t]*np.sin(E)-Mt[t]
-            j, maxIter, delta = 0, 30, 0.0000000001
-            while (j < maxIter)*(np.abs(F) > delta):
-                E = E-F/(1-e[t]*np.cos(E))
-                F = E-e[t]*np.sin(E)-Mt[t]
-                j += 1
-            EA.append(E)
-        EA = np.array(EA)
-        nu = np.arctan2(np.sqrt(1+e)*np.sin(EA/2), np.sqrt(1-e)*np.cos(EA/2))
-
-        # plt.figure()
-        # plt.plot(time, a[idx]*(1-e*np.cos(EA)))
-        rc = a[idx]*(1-e*np.cos(EA))
-        # print(a[idx], np.max(rc), np.min(rc), np.mean(rc))
-        print('a: {}, {}\nr_max: {}, {}\nr_min {}, {}\n'.format(a[idx], np.mean(rc), a[idx]*(1+np.max(e)), np.max(rc), a[idx]*(1-np.min(e)), np.min(rc)))
-
-        o_vec = np.array([rc*np.cos(nu), rc*np.sin(nu), 0])
-
-        rx = (o_vec[0]*(np.cos(w)*np.cos(O)-np.sin(w)*np.cos(i)*np.sin(O))-
-              o_vec[1]*(np.sin(w) * np.cos(O)+np.cos(w)*np.cos(i)*np.sin(O)))
-        ry = (o_vec[0]*(np.cos(w)*np.sin(O)+np.sin(w)*np.cos(i)*np.cos(O))+
-              o_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O)-np.sin(w)*np.sin(O)))
-        rz = (o_vec[0]*(np.sin(w) * np.sin(i)) + o_vec[1]*(np.cos(w)*np.sin(i)))
-
-        return rx, ry, rz
+    
 
 
 def plot_simulation_separate(t_data=None, y_data=None, xlabel="", ylabel="", data_labels=None):
@@ -455,12 +438,13 @@ def plot_eccentricity(t, eccentricity, label):
         text.set_color("white")
 
 if __name__ == "__main__":
-    star_system = solar_System(1., 1., 'solar_system.csv')
+    star_system = solar_System(1., 1., 'js_system.csv')
     # star_system.print_planets()
-    t = np.linspace(-10*10**6, 10*10**6, 10000)
-    # t = np.linspace(-10*10**6, 10*10**6, 30000)
-    # t = np.linspace(-100000, 100000, 300)
-    eccentricities, inclinations = star_system.simulate(t=t, plot=False, separate=False)
+    # t = np.linspace(-10*10**6, 10*10**6, 10000)
+    # print(t[100]-t[0])
+    t = np.linspace(-10*10**4, 10*10**4, 10000)
+    # t = np.linspace(0, 1000, 1508)
+    eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=False, plot=True, separate=False)
 
     plt.show()
 
