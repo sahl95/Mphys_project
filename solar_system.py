@@ -77,10 +77,8 @@ class solar_System():
             j_laplace_coeff_jk, j_laplace_coeff_jj = 2, 1
             front_factor = -1
             J2_correction = (((3/2)*J2*(R/a)**2)-((9/8)*(J2**2)*(R/a)**4)-((15/4)*J4*(R/a)**4))
-
             gr_correction[0] = 3*(a[0]/AU)**2*(n[0])**3/(LIGHT_SPD**2*(1+m[0]/M_star_kg))*1/(1-e[0]**2)
-            # print(3*(a[0]/AU)**2*(n[0])**3/(LIGHT_SPD**2*(1+m[0]/M_star_kg))*10**12)
-            # print(n[0])
+            # gr_correction = 3*(a/AU)**2*(n)**3/(LIGHT_SPD**2*(1+m/M_star_kg))*1/(1-e**2)
 
         if matrix_id == 'B':
             j_laplace_coeff_jk = j_laplace_coeff_jj = 1
@@ -96,7 +94,7 @@ class solar_System():
                         alpha_jk = alpha_jk**(-1)
                     laplace_coeff = calculate_laplace_coeff(alpha_jk, j_laplace_coeff_jk, 3/2)
                     alpha_jk_bar = np.where(a[k] < a[j], 1, alpha_jk)
-                    f_mat[j, k] = front_factor*(n[j]/4)*(m[k]/(M_star_kg+m[j]))*alpha_jk*alpha_jk_bar*laplace_coeff#*(1+alpha_jk**2*gr_correction[j])
+                    f_mat[j, k] = front_factor*(n[j]/4)*(m[k]/(M_star_kg+m[j]))*alpha_jk*alpha_jk_bar*laplace_coeff
 
                 else:
                     for kk in range(n_planets):
@@ -107,8 +105,9 @@ class solar_System():
                             laplace_coeff = calculate_laplace_coeff(alpha_jj, j_laplace_coeff_jj, 3/2)
                             alpha_jj_bar = np.where(a[kk] < a[j], 1, alpha_jj)
                             f_mat[j, k] += (1/4)*(m[kk]/(M_star_kg+m[j]))*alpha_jj*alpha_jj_bar*laplace_coeff
-                    f_mat[j, k] += J2_correction[j]#+gr_correction[j]
+                    f_mat[j, k] += J2_correction[j]
                     f_mat[j, k] *= -front_factor*(n[j])
+                    f_mat[j, k] += gr_correction[j]
         # print(f_mat[0, 0], gr_correction[0])
         return f_mat
 
@@ -249,7 +248,7 @@ class solar_System():
             for i in range(n):
                 h_dot_j += A[j, i]*k_list[i]
                 k_dot_j -= A[j, i]*h_list[i]
-            pidot_j = 3600*(k_list[j]*h_dot_j - h_list[j]*k_dot_j)/(eccentricities[j])**2
+            pidot_j = (k_list[j]*h_dot_j - h_list[j]*k_dot_j)/(eccentricities[j])**2
             # pidot_j = ma.masked_array(pidot_j, np.abs(pidot_j)>10).filled(0)
 
             d_pidot_dt_list.append(pidot_j)
@@ -349,8 +348,6 @@ class solar_System():
         p_list = self.eq_of_motion(**kwargs, eq_id='p')#*180/np.pi
         q_list = self.eq_of_motion(**kwargs, eq_id='q')#*180/np.pi
 
-        
-
         if plot_orbit:
             x, y, z = np.zeros(2), np.zeros(2), np.zeros(2)
             fig = plt.figure(figsize=(6, 6))
@@ -358,7 +355,7 @@ class solar_System():
             ax.plot(x, y, z, 'b*', markersize=3, zorder=-999)
             # ax = fig.add_subplot(111)
             # ax.plot(0, 0, 'b*', markersize=3)
-            for idx in range(len(self.planets)-4):
+            for idx in range(len(self.planets)-5):
                 X, Y, Z = self.kep2cart(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
                 # ax.plot(X, Y, '.', markersize=2, label=names[idx])
                 ax.plot(X, Y, Z, '.', markersize=2, label=names[idx], zorder=-idx)
@@ -367,14 +364,7 @@ class solar_System():
                 plt.xlabel('x (AU)')
                 plt.ylabel('y (AU)')
             # print(np.mean(np.sqrt(X**2+Y**2+Z**2)))
-            
             # plt.legend()
-        
-        # plt.figure()
-        # plt.plot(t, inclinations[3]*180/np.pi)
-        # plt.figure()
-        # plt.plot(t, eccentricities[3])
-
 
         precession_rates, xlabel = self.get_perihelion_precession_rates(A, eccentricities, h_list, k_list), 'Pericenter'
         # precession_rates, xlabel = self.get_ascending_node_precession_rates(B, inclinations*180/np.pi, p_list, q_list), 'Ascending node'
@@ -386,7 +376,7 @@ class solar_System():
 
         for idx in range(len(precession_rates)):
             print('Precession rate of {} = {:.4f} arcseconds per century'.format(names[idx],
-                  np.mean(precession_rates[idx])*180/np.pi*100))
+                  np.mean(precession_rates[idx])*180/np.pi*3600*100))
             # print('Eccentricity of {} = {:.2f}'.format(names[idx],
             #       np.mean(eccentricities[idx])))
             # print('Inclination of {} = {:.2f} degrees'.format(names[idx],
@@ -454,9 +444,9 @@ def plot_eccentricity(t, eccentricity, label):
 if __name__ == "__main__":
     star_system = solar_System(1., 1., 'solar_system.csv')
     # star_system.print_planets()
-    t = np.linspace(-10*10**6, 10*10**6, 10000)
+    # t = np.linspace(-10*10**6, 10*10**6, 10000)
     # print(t[100]-t[0])
-    # t = np.linspace(-1*10**5, 1*10**5, 10000)
+    t = np.linspace(-5*10**6, 5*10**6, 10000)
     # t = np.linspace(0, 1000, 1508)
     eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=False, plot=False, separate=False)
 
