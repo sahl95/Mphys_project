@@ -28,6 +28,15 @@ def scaling_factor_and_phase(p, *boundaries):
     # test what real and imaginary componets of the equations look like of s*np.sin(phase)=(a+b*1j)*np.sin(c+d*1j)
     return (s*np.sin(phase)-boundaries[0], s*np.cos(phase)-boundaries[1])
 
+def f(x, *boundaries):
+    boundaries = boundaries[0]
+    return [(x[0])*np.sin(x[1])-boundaries[0], (x[0])*np.cos(x[1])-boundaries[1]]
+
+def real_f(x1, *boundaries):
+    x = [x1[0]+1j*x1[1], x1[2]+1j*x1[3]]
+    actual_f = f(x, boundaries)
+    return [np.real(actual_f[0]), np.imag(actual_f[0]), np.real(actual_f[1]), np.imag(actual_f[1])]
+
 class solar_System():
 
     def __init__(self, starMass, starRadius, planet_data_file):
@@ -69,16 +78,16 @@ class solar_System():
         a = AU*self.get_property_all_planets('a')
         e = self.get_property_all_planets('e')
         n_planets = len(self.planets)
-        f_mat = np.zeros([n_planets, n_planets])
-
-        gr_correction = np.zeros(n_planets)
+        # f_mat = np.zeros([n_planets, n_planets])
+        f_mat = np.zeros([n_planets, n_planets], dtype='complex128')
+        
+        gr_correction = 3*(a/AU)**2*(n)**3/(LIGHT_SPD**2*(1+m/M_star_kg))*1/(1-e**2)
 
         if matrix_id == 'A':
             j_laplace_coeff_jk, j_laplace_coeff_jj = 2, 1
             front_factor = -1
             J2_correction = (((3/2)*J2*(R/a)**2)-((9/8)*(J2**2)*(R/a)**4)-((15/4)*J4*(R/a)**4))
-            gr_correction[0] = 3*(a[0]/AU)**2*(n[0])**3/(LIGHT_SPD**2*(1+m[0]/M_star_kg))*1/(1-e[0]**2)
-            # gr_correction = 3*(a/AU)**2*(n)**3/(LIGHT_SPD**2*(1+m/M_star_kg))*1/(1-e**2)
+            # gr_correction[0] = 3*(a[0]/AU)**2*(n[0])**3/(LIGHT_SPD**2*(1+m[0]/M_star_kg))*1/(1-e[0]**2)
 
         if matrix_id == 'B':
             j_laplace_coeff_jk = j_laplace_coeff_jj = 1
@@ -107,7 +116,13 @@ class solar_System():
                             f_mat[j, k] += (1/4)*(m[kk]/(M_star_kg+m[j]))*alpha_jj*alpha_jj_bar*laplace_coeff
                     f_mat[j, k] += J2_correction[j]
                     f_mat[j, k] *= -front_factor*(n[j])
-                    f_mat[j, k] += gr_correction[j]
+                    if j == 0:
+                        f_mat[j, k] += gr_correction[j]
+                    # else:
+                    #     f_mat[j, k] += gr_correction[j]*alpha_jj
+                    # """
+                    # Sum alpha's in gr corrections???
+                    # """
         # print(f_mat[0, 0], gr_correction[0])
         return f_mat
 
@@ -117,26 +132,15 @@ class solar_System():
         i = self.get_property_all_planets('i')*np.pi/180
         omega = self.get_property_all_planets('omega')*np.pi/180
 
-        h = e*np.sin(omega_bar)
-        k = e*np.cos(omega_bar)
-        p = i*np.sin(omega)
-        q = i*np.cos(omega)
+        h = np.array(e*np.sin(omega_bar), dtype='complex128')
+        k = np.array(e*np.cos(omega_bar), dtype='complex128')
+        p = np.array(i*np.sin(omega), dtype='complex128')
+        q = np.array(i*np.cos(omega), dtype='complex128')
 
         return h, k, p, q
 
     def solve_property(self, eigenvectors, initial_conditions):
-        n = len(self.planets)
-        aug = Matrix(np.zeros([n, n+1]))
-        aug[:, :n] = eigenvectors
-        aug[:, n] = initial_conditions
-
-        result = linsolve(aug, *symbols('x0:'+str(n)))
-
-        answers = np.zeros(n)
-        for ans in result:
-            for a, answer in enumerate(ans):
-                answers[a] = answer
-        # answers = np.linalg.solve(eigenvectors, initial_conditions)
+        answers = np.linalg.solve(eigenvectors, initial_conditions)
         return answers
 
     def find_all_scaling_factor_and_phase(self, eigenvectors_of_A, eigenvectors_of_B):
@@ -154,13 +158,18 @@ class solar_System():
         # print(q_solved)
 
         n = len(self.planets)
-        S, beta = np.zeros(n), np.zeros(n)
-        T, gamma = np.zeros(n), np.zeros(n)
+        S, beta = np.zeros(n, dtype='complex128'), np.zeros(n, dtype='complex128')
+        T, gamma = np.zeros(n, dtype='complex128'), np.zeros(n, dtype='complex128')
 
         for i in range(n):
-            S[i], beta[i] = fsolve(scaling_factor_and_phase, (1, -1), args=(h_solved[i], k_solved[i],))
-            T[i], gamma[i] = fsolve(scaling_factor_and_phase, (-1, 1), args=(p_solved[i], q_solved[i],))
-
+            # S[i], beta[i] = fsolve(scaling_factor_and_phase, (1, -1), args=(h_solved[i], k_solved[i],))
+            # T[i], gamma[i] = fsolve(scaling_factor_and_phase, (-1, 1), args=(p_solved[i], q_solved[i],))
+            S_real, S_img, beta_real, beta_img = fsolve(real_f, (1, 1, -1, -1), args=(h_solved[i], k_solved[i],))
+            T_real, T_img, gamma_real, gamma_img = fsolve(real_f, (1, 1, -1, -1), args=(p_solved[i], q_solved[i],))
+            
+            S[i], beta[i] = S_real+S_img, beta_real+beta_img
+            T[i], gamma[i] = T_real+T_img, gamma_real+gamma_img
+            
         return S, beta, T, gamma
 
     def eq_of_motion(self, scaled_eigenvector, eigenvalue, phase, t, eq_id):
@@ -226,7 +235,8 @@ class solar_System():
         eccentricities = []
         h, k = self.eq_of_motion(**kwargs, eq_id='h'), self.eq_of_motion(**kwargs, eq_id='k')
         for j in range(n):  
-            eccentricities.append(np.sqrt(h[j]**2+k[j]**2))
+            # eccentricities.append(np.sqrt(h[j]**2+k[j]**2))
+            eccentricities.append(np.real(np.sqrt(h[j]*np.conjugate(h[j])+k[j]*np.conjugate(k[j]))))
         return np.array(eccentricities)
 
     def get_inclination(self, scaled_eigenvector_of_B, eigenvalue_of_B, gamma, t):
@@ -236,7 +246,7 @@ class solar_System():
         inclinations = []
         p, q = self.eq_of_motion(**kwargs, eq_id='p'), self.eq_of_motion(**kwargs, eq_id='q')
         for j in range(n):
-            inclinations.append(np.sqrt(p[j]**2+q[j]**2))
+            inclinations.append(np.real(np.sqrt(p[j]*np.conjugate(p[j])+q[j]*np.conjugate(q[j]))))
         return np.array(inclinations)
 
     def get_perihelion_precession_rates(self, A, eccentricities, h_list, k_list):
@@ -251,7 +261,7 @@ class solar_System():
             pidot_j = (k_list[j]*h_dot_j - h_list[j]*k_dot_j)/(eccentricities[j])**2
             # pidot_j = ma.masked_array(pidot_j, np.abs(pidot_j)>10).filled(0)
 
-            d_pidot_dt_list.append(pidot_j)
+            d_pidot_dt_list.append(np.real(pidot_j))
         return d_pidot_dt_list
 
     
@@ -276,10 +286,12 @@ class solar_System():
     def get_pi_or_omega(self, hp, kq):
         pi_om = []
         for i in range(len(self.planets)):
-            pi_om.append(np.arctan2(hp[i], kq[i]))
+            pi_om.append(np.arctan2(np.real(hp[i]), np.real(kq[i])))
         return np.array(pi_om)
 
     def kep2cart(self, ecc, inc, h_list, k_list, p_list, q_list, time, t0, idx):
+        time = np.real(time)
+        
         O_list = self.get_pi_or_omega(p_list, q_list)
         w_list = O_list-self.get_pi_or_omega(h_list, k_list)
 
@@ -306,6 +318,7 @@ class solar_System():
                 j += 1
             EA.append(E)
         EA = np.array(EA)
+        # print(EA)
         nu = 2*np.arctan2(np.sqrt(1+e)*np.sin(EA/2), np.sqrt(1-e)*np.cos(EA/2))
 
         rc = a[idx]*(1-e*np.cos(EA))
@@ -317,7 +330,7 @@ class solar_System():
               o_vec[1]*(np.sin(w)*np.cos(O)+np.cos(w)*np.cos(i)*np.sin(O)))
         ry = (o_vec[0]*(np.cos(w)*np.sin(O)+np.sin(w)*np.cos(i)*np.cos(O))+
               o_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O)-np.sin(w)*np.sin(O)))
-        rz = (o_vec[0]*(np.sin(w)*np.sin(i)) + o_vec[1]*(np.cos(w)*np.sin(i)))
+        rz = (o_vec[0]*(np.sin(w)*np.sin(i))+o_vec[1]*(np.cos(w)*np.sin(i)))
 
         return rx, ry, rz
 
@@ -348,6 +361,7 @@ class solar_System():
         p_list = self.eq_of_motion(**kwargs, eq_id='p')#*180/np.pi
         q_list = self.eq_of_motion(**kwargs, eq_id='q')#*180/np.pi
 
+        t = np.real(t)
         if plot_orbit:
             x, y, z = np.zeros(2), np.zeros(2), np.zeros(2)
             fig = plt.figure(figsize=(6, 6))
@@ -355,11 +369,13 @@ class solar_System():
             ax.plot(x, y, z, 'b*', markersize=3, zorder=-999)
             # ax = fig.add_subplot(111)
             # ax.plot(0, 0, 'b*', markersize=3)
-            for idx in range(len(self.planets)-5):
+            for idx in range(len(self.planets)):
                 X, Y, Z = self.kep2cart(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
                 # ax.plot(X, Y, '.', markersize=2, label=names[idx])
                 ax.plot(X, Y, Z, '.', markersize=2, label=names[idx], zorder=-idx)
                 ax.set_zlim(-np.max([np.max(X), np.max(Y)])/2, np.max([np.max(X), np.max(Y)])/2)
+                ax.set_ylim(-np.max([np.max(X), np.max(Y)]), np.max([np.max(X), np.max(Y)]))
+                ax.set_xlim(-np.max([np.max(X), np.max(Y)]), np.max([np.max(X), np.max(Y)]))
                 ax.set_zlabel('z (AU)')
                 plt.xlabel('x (AU)')
                 plt.ylabel('y (AU)')
@@ -375,17 +391,14 @@ class solar_System():
         # plot_eccentricity(t, eccentricities[idx], names[idx])
 
         for idx in range(len(precession_rates)):
-            print('Precession rate of {} = {:.4f} arcseconds per century'.format(names[idx],
-                  np.mean(precession_rates[idx])*180/np.pi*3600*100))
+            # print('Precession rate of {} = {:.4f} arcseconds per century'.format(names[idx],
+            #       np.mean(precession_rates[idx])*180/np.pi*3600*100))
             # print('Eccentricity of {} = {:.2f}'.format(names[idx],
             #       np.mean(eccentricities[idx])))
-            # print('Inclination of {} = {:.2f} degrees'.format(names[idx],
-            #       np.mean(inclinations[idx])*180/np.pi))
+            print('Inclination of {} = {:.2f} degrees'.format(names[idx],
+                  np.mean(inclinations[idx])*180/np.pi))
 
         return eccentricities, inclinations
-    
-    
-
 
 def plot_simulation_separate(t_data=None, y_data=None, xlabel="", ylabel="", data_labels=None):
     for idx in range(len(star_system.planets)):
@@ -444,11 +457,11 @@ def plot_eccentricity(t, eccentricity, label):
 if __name__ == "__main__":
     star_system = solar_System(1., 1., 'solar_system.csv')
     # star_system.print_planets()
-    # t = np.linspace(-10*10**6, 10*10**6, 10000)
+    # t = np.linspace(-10*10**6, 10*10**6, 10000)+0j
     # print(t[100]-t[0])
-    t = np.linspace(-5*10**6, 5*10**6, 10000)
-    # t = np.linspace(0, 1000, 1508)
-    eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=False, plot=False, separate=False)
+    # t = np.linspace(-5*10**6, 5*10**6, 10000)
+    t = np.linspace(0, 1000, 1508)+0j
+    eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=True, plot=False, separate=False)
 
     plt.show()
 
