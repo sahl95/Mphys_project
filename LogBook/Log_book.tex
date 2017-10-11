@@ -122,6 +122,8 @@ columns=fullflexible,
 \author{Sahl Rowther}
 %\date{}							% Activate to display a given date or no date
 
+\input{Journal_abbreviations.tex}
+
 \begin{document}
 
 \pagestyle{empty}                       % No numbers of title page  
@@ -413,12 +415,12 @@ AU = 149597870700
         return B, eigenvalues, eigenvectors
 \end{lstlisting}
 
-\section{Week 2: September 18$^{th} - $24$^{th}$}
+\section{Week 2: September 18$^{th} - $24$^{th}$ 2017}
 
 \newpage
 
 
-\section{Week 3: September 25$^{th} - $31$^{st}$}
+\section{Week 3: September 25$^{th} - $31$^{st}$ 2017}
 
 \subsection{Simulation of solar system}
 
@@ -645,7 +647,13 @@ A similar process can be done with $k_{j}$ to solve for $S_{i}\cos \beta_{i}$:
 
 Solving the above two matrices gives one set of equations in terms of $S_{i} \sin \beta_{i}$ and another set of equations in terms of $S_{i} \cos \beta_{i}$. Solving them simultaneously results in values for $S_{i}$ and $\beta_{i}$. A similar process can be done to solve for $T_{i}$ and $\gamma_{i}$.
 
-\begin{lstlisting}[language=Python, caption={Calculating the scale factors and phases}, firstnumber=73]
+\begin{lstlisting}[language=Python, caption={Equations for simultaneously solving for the scale factor and phase in Code \ref{s_phase}}]
+def scaling_factor_and_phase(p, *boundaries):
+    s, phase = p
+    return (s*np.sin(phase)-boundaries[0], s*np.cos(phase)-boundaries[1])
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption={Calculating the scale factors and phases}, firstnumber=73, label=s_phase]
     def solve_property(self, eigenvectors, initial_conditions):
         n = len(self.planets)
         aug = Matrix(np.zeros([n, n+1]))
@@ -838,9 +846,7 @@ The first test is to replicate the eccentricity and inclination outputs in Figur
     \label{JSout}
 \end{figure}
 
-\subsubsection*{Verdict}
-
-Figure \ref{JSout} is a very good match to that of the output in Murray \& Dermott (1999)\cite{ssd}.
+\textbf{Verdict}: Figure \ref{JSout} is a very good match to that of the output in Murray \& Dermott (1999)\cite{ssd}.
 
 \subsubsection{Whole Solar System}
 
@@ -991,6 +997,8 @@ Another test that serves as a good indicator of the accuracy of the simulation i
 \subsubsection*{Verdict}
 
 From Figure \ref{fig:pidot}, it can be seen the mean precession, the red dashed line is equal to $544.86{}''$ per century; consistent with expectations and without the addition of General Relativity. The plot of the precession rate also matched with expected results\cite{texas}.
+
+The effect of the oblateness of the Sun on the precession rate of Mercury was also found to be $\sim 0.08{}''$ per century. The small magnitude of the change is as expected.
         
 \begin{figure}[!h]
     \centering
@@ -1011,33 +1019,91 @@ From Figure \ref{fig:pidot}, it can be seen the mean precession, the red dashed 
         	\label{fig:pidot}
     \end{subfigure}
     \caption{}
-    \label{}
+    \label{Merc1}
 \end{figure}
 
 \newpage
 \
 \newpage
 
-\section{Week 4: October 1$^{st} - $8$^{th}$}
+\section{Week 4: October 1$^{st} - $8$^{th}$ 2017}
 
 \subsection{Keplerian to Cartesian coordinates}
 
-The next test to check accuracy is to convert the output of the equations of motion to cartesian coordinates in order to plot the Solar System for visual inspection.
+The next test to check accuracy is to convert the output of the equations of motion to cartesian coordinates in order to plot the Solar System for visual inspection. For this we use:
+\begin{itemize}
+\item $h, k, p, q$ - the equations of motion.
+\item $e$ - the eccentricity.
+\item $i$ - the inclination (in radians).
+\item $a$ - the semi-major axis (in $AU$).
+\item $n$ - the orbital frequency (in radians per year)
+\end{itemize}
+First the mean anomaly, $M(t)$ is found using
+\begin{equation}
+M(t) = n(t-t_{0}).
+\end{equation}
+Then the eccentric anomaly $E \equiv E(t)$ is calculated by solving
+\begin{equation}
+M(t) = E(t) - e\sin E(t)
+\end{equation}
+using the Newton-Raphson method:
+\begin{equation}
+E_{j+1} = E_{j} - \frac{f(E_{j})}{\frac{d}{dE_{j}}f(E_{j})} = E_{j} - \frac{E_{j} - e\sin E_{j} - M}{1-e\cos E_{j}}, \hspace*{1cm} E_{0}=M
+\end{equation}
+The above equation was iterated until $E_{j+1} = E_{j}$. Then the trua anomaly $\nu(t)$ was calculated using
+\begin{equation}
+\nu(t) = 2 \, \text{arctan2} \left (\sqrt{1+e} \sin \frac{E(t)}{2}, \sqrt{1-e} \cos \frac{E(t)}{2} \right).
+\end{equation}
+Where $ \text{arctan2}$ is the two argument arctangent function. The distance $r_{c}$ from the central body was then calculated using
+\begin{equation}
+r_{c} = a(1-e \cos E(t)).
+\end{equation}
+Then the position vector in the orbital frame was found using
+\begin{equation}
+\mathbf{o}(t) = \begin{pmatrix}
+o_{x}(t)\\ 
+o_{y}(t)\\ 
+o_{z}(t)
+\end{pmatrix} = r_{c}(t) \begin{pmatrix}
+\cos \nu(t)\\ 
+\sin \nu(t)\\ 
+0
+\end{pmatrix}
+\end{equation}
+Then $\Omega$, the longitude of the ascending node, and $\omega$, the argument of the periapsis was found using
+\begin{subequations}
+   \begin{equation}
+   \Omega =  \text{arctan2}(p, q),
+   \end{equation}
+   \begin{equation}
+   \omega = \Omega - \text{arctan2}(h, k).
+   \end{equation}
+\end{subequations}
+Finally the cartesian coordinates could be found using
+\begin{equation}
+\mathbf{r}(t) = \begin{pmatrix}
+o_{x}(t)(\cos(\omega)\cos(\Omega)-\sin(\omega)\cos(i)\sin(\Omega))-o_{y}(t)(\sin(\omega)\cos(\Omega)+\cos(\omega)\cos(i)\sin(\Omega))\\ 
+o_{x}(t)(\cos(\omega)\sin(\Omega)+\sin(\omega)\cos(i)\cos(\Omega))+o_{y}(t)(\cos(\omega)\cos(i)\cos(\Omega)-\sin(\omega)\sin(\Omega))\\ 
+o_{x}(t)(\sin(\omega)\sin(i))+o_{y}(t)(\cos(\omega)\sin(i))
+\end{pmatrix}
+\end{equation}
+
 
 \textbf{Code}:
 \begin{lstlisting}[language=Python, caption={Converting from Keplerian to Cartesian coordinates}]
+    def get_pi_or_omega(self, hp, kq):
+        pi_om = []
+        for i in range(len(self.planets)):
+            pi_om.append(np.arctan2(hp[i], kq[i]))
+        return np.array(pi_om)
+
     def kep2cart(self, ecc, inc, h_list, k_list, p_list, q_list, time, t0, idx):
         O_list = self.get_pi_or_omega(p_list, q_list)
         w_list = O_list-self.get_pi_or_omega(h_list, k_list)
-
         n = self.get_property_all_planets('n')
         a = self.get_property_all_planets('a')
-        l = self.get_property_all_planets('l')*np.pi/180
-        pi = self.get_property_all_planets('omega_bar')*np.pi/180
 
-        M0 = l[idx]-pi[idx]
         Mt = n[idx]*np.pi/180*(time-t0)
-
         EA = []
         e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
         for t in range(len(time)):
@@ -1062,6 +1128,10 @@ The next test to check accuracy is to convert the output of the equations of mot
         return rx, ry, rz
 \end{lstlisting}
 
+\subsection{Test of conversion}
+
+To test the conversion and the accuracy of the simulation, the Solar System was simulated for 1000 years and plotted below in Cartesian coordinates.
+
 \begin{figure}[!h]
 \begin{center}
 \includegraphics[width= 0.8\textwidth]{SolarSystem3D_rsz}
@@ -1070,7 +1140,79 @@ The next test to check accuracy is to convert the output of the equations of mot
 \end{center}
 \end{figure}
 
+\textbf{Verdict}: The plot is as expected. The plot was also used to ensure the time period of orbits were as expected, which they were.
+
+\subsection{General Relativity corrections}
+
+General Relativity (GR) corrections add an additional term to $\dot{\varpi}_{j}$. This additional term is given by \cite{Adams2006}
+\begin{equation}
+\dot{\varpi}_{j}^{GR} = 3\frac{a_{j}^{2}n_{j}^{3}}{c^{2}}.
+\end{equation}
+This term is added to the diagonal elements of $\mathbf{A}$ to accounts for the effects of GR.
+
+\subsection{Test of GR correction}
+
+To test the effects of GR on the precession rates $\dot{\varpi}$, each planet was simulated by itself and its precession rate was calculated. The effect of GR on $\dot{\varpi}$, in arc seconds per century, of each planet is shown below
+
+\begin{verbatim}
+Mercury : 42.8928
+Venus : 8.6069 
+Earth : 3.8309
+Mars : 1.3483 
+Jupiter : 0.0621 
+Saturn : 0.0137 
+Uranus : 0.0024 
+Neptune : 0.0008 
+Pluto : 0.0004 
+\end{verbatim}
+
+The inclusion of GR had the largest effect on Mercury, as expected. This can be seen in the difference of the eccentricity plots in Figure \ref{Merc2} and previously in Figure \ref{Merc1}.
+
+\begin{figure}[!h]
+    \centering
+    \begin{subfigure}[t]{0.49\textwidth}
+    %\captionsetup{justification=centering}
+    \captionsetup{width=0.9\textwidth}
+	\centering
+       	 \includegraphics[width=\textwidth]{Mercury_ecc_GR.png}
+       	 \caption{Evolution of eccentricity of Mercury.}
+        	\label{}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.49\textwidth}
+    %\captionsetup{justification=centering}
+    \captionsetup{width=0.9\textwidth}
+        	\centering
+	\includegraphics[width=\textwidth]{Mercury_pidot_GR.png}
+        	\caption{Precession rate, $\dot{\varpi}$ of Mercury.}
+        	\label{fig:pidot}
+    \end{subfigure}
+    \caption{Effect of GR on the orbit of Mercury.}
+    \label{Merc2}
+\end{figure}
+
+\textbf{Verdict}: These values match very well to calculated values of GR's affect \cite{GRpidot}. Additionally, including the effect of GR has also resulted in the eccentricity plot of Mercury becoming a closer match to Murray \& Dermott (1999) \cite{ssd}.
+
 \newpage
+
+\section{Week 5: October 9$^{th} - $15$^{th}$ 2017}
+
+\subsection{Eccentricity damping corrections}
+
+We assume that the tides raised by planets are more dominant relative to tides raised by the star. Thus the eccentricity damping rate is given by \cite{ssd, Zhang2013}
+\begin{equation}
+\lambda = -\frac{\dot{e}}{e} = \frac{63}{4} \frac{1}{Q{}'_{p}}\frac{m_{\star}}{m_{p}} \left (\frac{R_{p}}{a_{p}} \right)^{5} n_{p}.
+\end{equation}
+Where $R$ is the radius of the planet, $Q{}' \equiv 1.5Q/k_{2}$ is the modified tidal quality factor. $Q$ is the tidal quality factor and $k_{2}$ is the Love number of degree 2 of the planet. All other terms are the same as before. The values of $Q$ and $k_{2}$ are taken from Goldreich \& Sotter (1966)\cite{Goldreich1966}, Zhang (1992)\cite{Zhang1992}, and Gavrilov \& Kharkov (1977)\cite{Gavrilov1977}. Similarly to the GR correction, $\sqrt{-1}\lambda$ is added to diagonal elements of $\mathbf{A}$ to account for the effect of tides.
+
+\subsection{Test of eccentricity damping}
+
+As before with GR, the effect of eccentricity damping is tested on the precession rate of the planets. It was found that this additional had no effect, at least on timescales of a few million years. However, for the Solar System, only a small change is expected, on timescales of billions of years.
+
+\subsection{Simulating other 2 planet systems}
+
+
+\newpage
+
 
 
 \bibliography{LogbookBib} 
