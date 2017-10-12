@@ -1,0 +1,39 @@
+.. Mphys_project documentation master file, created by
+   sphinx-quickstart on Wed Oct 11 19:33:58 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Mphys_project's documentation!
+=========================================
+
+
+.. toctree::
+   :maxdepth: 4
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+Modules
+=======
+
+.. autosummary::
+   planet
+   solar_system
+
+1. Planet
+=========
+
+.. automodule:: planet
+   :members:
+
+
+2. Solar_System
+===============
+
+.. automodule:: solar_system
+   :members: 

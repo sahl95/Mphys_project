@@ -1,0 +1,546 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to Mphys_project’s documentation! &mdash; Mphys_project  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Mphys_project  documentation" href="#"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> Mphys_project
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Welcome to Mphys_project’s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#modules">Modules</a></li>
+<li><a class="reference internal" href="#module-planet">1. Planet</a></li>
+<li><a class="reference internal" href="#module-solar_system">2. Solar_System</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Mphys_project</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Welcome to Mphys_project’s documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-mphys-project-s-documentation">
+<h1>Welcome to Mphys_project’s documentation!<a class="headerlink" href="#welcome-to-mphys-project-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+<div class="section" id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#module-planet" title="planet"><code class="xref py py-obj docutils literal"><span class="pre">planet</span></code></a></td>
+<td>Object to store planet orbital properties.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#module-solar_system" title="solar_system"><code class="xref py py-obj docutils literal"><span class="pre">solar_system</span></code></a></td>
+<td>Simulates the Solar System.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="module-planet">
+<span id="planet"></span><h1>1. Planet<a class="headerlink" href="#module-planet" title="Permalink to this headline">¶</a></h1>
+<p>Object to store planet orbital properties.</p>
+<dl class="class">
+<dt id="planet.planet">
+<em class="property">class </em><code class="descclassname">planet.</code><code class="descname">planet</code><span class="sig-paren">(</span><em>Name=”</em>, <em>Period=None</em>, <em>e=None</em>, <em>a=None</em>, <em>i=None</em>, <em>Omega=None</em>, <em>pi=None</em>, <em>l=None</em>, <em>Mass=None</em>, <em>n=None</em>, <em>k=None</em>, <em>Q=None</em>, <em>r=None</em><span class="sig-paren">)</span><a class="headerlink" href="#planet.planet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to store planet orbital properties.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Name</strong> (<em>str</em>) – The name of the planet.</li>
+<li><strong>a</strong> (<em>float</em>) – The semi-major axis in AU.</li>
+<li><strong>e</strong> (<em>float</em>) – The eccentricity of the orbit.</li>
+<li><strong>i</strong> (<em>float</em>) – The inclination of the orbit in degrees.</li>
+<li><strong>Omega</strong> (<em>float</em>) – The longitude of the ascending node in degrees.</li>
+<li><strong>pi</strong> (<em>float</em>) – The longitude of the periapsis in degrees.</li>
+<li><strong>Mass</strong> (<em>float</em>) – The mass of the planet in Earth masses.</li>
+<li><strong>r</strong> (<em>float</em>) – The radius of the planet in meters.</li>
+<li><strong>n</strong> (<em>float</em>) – The orbital angular frequency in degrees per year.</li>
+<li><strong>k</strong> (<em>float</em>) – The Love number of degree 2 of the planet.</li>
+<li><strong>Q</strong> (<em>float</em>) – The tidal quality factor of the planet.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-solar_system">
+<span id="solar-system"></span><h1>2. Solar_System<a class="headerlink" href="#module-solar_system" title="Permalink to this headline">¶</a></h1>
+<p>Simulates the Solar System.</p>
+<dl class="function">
+<dt id="solar_system.calculate_laplace_coeff">
+<code class="descclassname">solar_system.</code><code class="descname">calculate_laplace_coeff</code><span class="sig-paren">(</span><em>alpha</em>, <em>j</em>, <em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.calculate_laplace_coeff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the Laplace coeffecient given by</p>
+<div class="math">
+<p><img src="_images/math/29d05cd06ecfc31109727bae6e40cfdff7145493.png" alt="b^{(j)}_{s} (\alpha) = \frac{1}{\pi}\int_{0}^{2\pi}\left [ \frac{cos(j \psi)}{(1+\alpha^{2} - 2\alpha \cos\, \psi)^{s}} \right]d\psi."/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>alpha</strong> (<em>float</em>) – </li>
+<li><strong>j</strong> (<em>float</em>) – </li>
+<li><strong>s</strong> (<em>float</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The value of the Laplace coefficient.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="solar_system.solar_System">
+<em class="property">class </em><code class="descclassname">solar_system.</code><code class="descname">solar_System</code><span class="sig-paren">(</span><em>starMass</em>, <em>starRadius</em>, <em>planet_data_file</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the mass and radius of the Sun. Also stores the properties of the orbiting planets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>starMass</strong> (<em>float</em>) – The mass of the Sun in solar masses.</li>
+<li><strong>starRadius</strong> (<em>float</em>) – The radius of the Sun in solar radii.</li>
+<li><strong>planet_data_file</strong> (<em>str</em>) – A data file containing planet orbital properties.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="solar_system.solar_System.add_planets">
+<code class="descname">add_planets</code><span class="sig-paren">(</span><em>planet_data_file</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System.add_planets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create planet objects using <a class="reference internal" href="#planet.planet" title="planet.planet"><code class="xref py py-func docutils literal"><span class="pre">planet()</span></code></a> and adds each planet to a list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>planet_data_file</strong> (<em>str</em>) – A data file containing planet orbital properties.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of planet objects.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solar_system.solar_System.components_of_ecc_inc">
+<code class="descname">components_of_ecc_inc</code><span class="sig-paren">(</span><em>scaled_eigenvector</em>, <em>eigenvalue</em>, <em>phase</em>, <em>t</em>, <em>eq_id</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System.components_of_ecc_inc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the vertical and horizontal components of the eccentricity and inclination for all times.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>scaled_eigenvector</strong> (<em>numpy array</em>) – The scaled eigenvector of the frequency matrix.</li>
+<li><strong>eigenvalue</strong> (<em>numpy array</em>) – The eigenvalues of the frequency matrix.</li>
+<li><strong>phase</strong> (<em>numpy array</em>) – The phase shift.</li>
+<li><strong>t</strong> (<em>numpy array</em>) – The times to calculate the ertical and horizontal components of the eccentricity
+and inclination at.</li>
+<li><strong>eq_id</strong> (<em>str</em>) – Can be ‘h’, ‘k’, ‘p’, or ‘q’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An array containing the values of the equation of motion at all time.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The vertical and horizontal components of the eccentricity and inclination are given by</p>
+<div class="math">
+<p><img src="_images/math/28cb134181c44c22d58587e7717e6ebaf7879e81.png" alt="h_{j} = \sum_{i=0}^{N-1} e_{ji} \sin (g_{i}t+\beta_{i})\\
+k_{j} = \sum_{i=0}^{N-1} e_{ji} \cos (g_{i}t+\beta_{i})\\
+p_{j} = \sum_{i=0}^{N-1} I_{ji} \sin (f_{i}t+\gamma_{i})\\
+q_{j} = \sum_{i=0}^{N-1} I_{ji} \cos (f_{i}t+\gamma_{i})"/></p>
+</div><p class="last">where <img class="math" src="_images/math/961d379e98df8ed311d893c2041e04929d39922b.png" alt="e, I"/> are the scaled eigenvectors and <img class="math" src="_images/math/6012c2f6009db2b0426f209dae05d76fdf860e63.png" alt="f, g"/> are the eigenvalues of A and B
+respectively.</p>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#solar_system.solar_System.frequency_matrix" title="solar_system.solar_System.frequency_matrix"><code class="xref py py-func docutils literal"><span class="pre">frequency_matrix()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="solar_system.solar_System.find_all_scaling_factor_and_phase">
+<code class="descname">find_all_scaling_factor_and_phase</code><span class="sig-paren">(</span><em>eigenvectors_of_A</em>, <em>eigenvectors_of_B</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System.find_all_scaling_factor_and_phase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the scale factors <img class="math" src="_images/math/49ef7c0f1e5c65ce22937d598dc05974e1c69bec.png" alt="S, T"/> of the eigenvectors and the phases, <img class="math" src="_images/math/5d037be044398f064ca034d248115d14d32bc680.png" alt="\beta, \gamma"/>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>eigenvectors_of_A</strong> (<em>numpy array</em>) – The normalised eigenvectors of the frequency matrix A.</li>
+<li><strong>eigenvectors_of_B</strong> (<em>numpy array</em>) – The normalised eigenvectors of the frequency matrix B.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><img class="math" src="_images/math/1dbc400fcc213305415872f9f625cd2828f97a00.png" alt="S"/> (<em>numpy array</em>) - Scaling factor for the eigenvectors of A.</li>
+<li><img class="math" src="_images/math/410a9d0df9c135dd73b269cba7ef04dcfd932b1f.png" alt="\beta"/> (<em>numpy array</em>) - Phase shift for <img class="math" src="_images/math/e0a31805b592dbdbe965f2f6c0eba061f482877a.png" alt="h, k"/></li>
+<li><img class="math" src="_images/math/f2d283a2071f9d043c9e0b0f794a8880fa0d3ce9.png" alt="T"/> (<em>numpy array</em>) - Scaling factor for the eigenvectors of B.</li>
+<li><img class="math" src="_images/math/3666981dc77862de77b6ecfcb64aad59b425cbaf.png" alt="\gamma"/> (<em>numpy array</em>) - Phase shift for <img class="math" src="_images/math/e66c67c1f13d7676f6d583233ce66beb7e379a7c.png" alt="p, q"/></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solar_system.solar_System.frequency_matrix">
+<code class="descname">frequency_matrix</code><span class="sig-paren">(</span><em>matrix_id</em>, <em>J2=0</em>, <em>J4=0</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System.frequency_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the frequency matrix with the following correction terms included:</p>
+<ul class="simple">
+<li>Oblateness of the central body.</li>
+<li>General Relativity (For ‘A’ only).</li>
+<li>Eccentricity damping (For ‘A’ only).</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>J2</strong> (<em>float</em>) – First zonal gravity coefficient.</li>
+<li><strong>J4</strong> (<em>float</em>) – Second zonal gravity coefficient.</li>
+<li><strong>matrix_id</strong> (<em>str</em>) – Can be ‘A’ or ‘B’.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The frequency matrix, A or B as defined below.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If ‘A’</p>
+<div class="math">
+<p><img src="_images/math/47b52f4ab60911e271184c95042a990d4392d853.png" alt="A_{jj} = n_{j} &amp; \left [ \frac{3}{2}J_{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{2} -  \frac{9}{8}J_{2}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} -  \frac{15}{4}J_{4}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} \vphantom{\sum _{k\neq}} \right. \\
+&amp; \left. + 3\frac{a_{j}^{2}n_{j}^{2}}{c^{2}} + \frac{63}{4} \frac{1}{Q{}'_{p}}\frac{m_{\star}}{m_{p}} \left (\frac{R_{p}}{a_{p}} \right)^{5} \right.\\
+&amp; \left. + \frac{1}{4} \sum _{k\neq j} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \vphantom{\sum _{k\neq}} \right]"/></p>
+</div><div class="math">
+<p><img src="_images/math/2d5c3ddabf229ec0066d255f1c3be682d223fc16.png" alt="A_{jk} = -\frac{n_{j}}{4} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(2)}(\alpha_{jk}) \hspace*{1.8cm} (j \neq k)"/></p>
+</div><p>If ‘B’</p>
+<div class="math">
+<p><img src="_images/math/596b1406b1638e72c4fd9d4f535d9906de19e072.png" alt="B_{jj} = -n_{j} &amp; \left [ \frac{3}{2}J_{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{2} -  \frac{27}{8}J_{2}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} -  \frac{15}{4}J_{4}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} \vphantom{\sum _{k\neq}} \right. \\
+&amp; \left. + \frac{1}{4} \sum _{k\neq j} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \vphantom{\sum _{k\neq}} \right]"/></p>
+</div><div class="last math">
+<p><img src="_images/math/b511f6d3a7ca1b7c60af7242f4414fa3b94e57af.png" alt="B_{jk} = \frac{n_{j}}{4} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \hspace*{2.65cm} (j \neq k)"/></p>
+</div></div>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#solar_system.calculate_laplace_coeff" title="solar_system.calculate_laplace_coeff"><code class="xref py py-func docutils literal"><span class="pre">calculate_laplace_coeff()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="solar_system.solar_System.get_eccentricity">
+<code class="descname">get_eccentricity</code><span class="sig-paren">(</span><em>h_arr</em>, <em>k_arr</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System.get_eccentricity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the eccentricity of all planets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>h_arr</strong> (<em>numpy array</em>) – The vertical component of the eccentricity of each planet.</li>
+<li><strong>k_arr</strong> (<em>numpy array</em>) – The horizontal component of the eccentricity of each planet.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An array containing the values of the eccentricity at all times.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#solar_system.solar_System.components_of_ecc_inc" title="solar_system.solar_System.components_of_ecc_inc"><code class="xref py py-func docutils literal"><span class="pre">components_of_ecc_inc()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="solar_system.solar_System.get_inclination">
+<code class="descname">get_inclination</code><span class="sig-paren">(</span><em>p_arr</em>, <em>q_arr</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System.get_inclination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the inclination of all planets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p_arr</strong> (<em>numpy array</em>) – The vertical component of the inclination of each planet.</li>
+<li><strong>q_arr</strong> (<em>numpy array</em>) – The horizontal component of the inclination of each planet.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An array containing the values of the inclination at all times.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#solar_system.solar_System.components_of_ecc_inc" title="solar_system.solar_System.components_of_ecc_inc"><code class="xref py py-func docutils literal"><span class="pre">components_of_ecc_inc()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="solar_system.solar_System.get_property_all_planets">
+<code class="descname">get_property_all_planets</code><span class="sig-paren">(</span><em>property_name</em><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System.get_property_all_planets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array containing a specific property of all planets. The possible property names can be
+found in <a class="reference internal" href="#planet.planet" title="planet.planet"><code class="xref py py-func docutils literal"><span class="pre">planet()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>property_name</strong> (<em>str</em>) – The name of the property.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Array containing the specified property of each planet.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="solar_system.solar_System.initial_conditions">
+<code class="descname">initial_conditions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#solar_system.solar_System.initial_conditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the initial values for the 4 equations of motion (h, k, p, and q) for each planet.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><img class="math" src="_images/math/293fb39e1b93282c804a86186e721b32f829f1b2.png" alt="h"/> (<em>numpy array</em>)</li>
+<li><img class="math" src="_images/math/0b7c1e16a3a8a849bb8ffdcdbf86f65fd1f30438.png" alt="k"/> (<em>numpy array</em>)</li>
+<li><img class="math" src="_images/math/27d463da4622be5b3ef1d4176ced7d7a323c6425.png" alt="p"/> (<em>numpy array</em>)</li>
+<li><img class="math" src="_images/math/620a3ce6403ec82f1347af9985bc03f7a9382f4a.png" alt="q"/> (<em>numpy array</em>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Sahl Rowther.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
