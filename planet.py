@@ -1,66 +1,68 @@
 '''
-Sahl Rowther
+Object to store planet orbital properties.
 '''
 
 import pandas as pd
 
 class planet():
+    """
+    Object to store planet orbital properties.
 
-    def __init__(self, Name="", Period=None, e=None, a=None, i=None, Omega=None, omega_bar=None, l=None,
+    Args:
+        Name (str): The name of the planet.
+        a (float): The semi-major axis in AU.
+        e (float): The eccentricity of the orbit.
+        i (float): The inclination of the orbit in degrees.
+        Omega (float): The longitude of the ascending node in degrees.
+        pi (float): The longitude of the periapsis in degrees.
+        Mass (float): The mass of the planet in Earth masses.
+        r (float): The radius of the planet in meters.
+        n (float): The orbital angular frequency in degrees per year.
+        k (float): The Love number of degree 2 of the planet.
+        Q (float): The tidal quality factor of the planet.
+    """
+    def __init__(self, Name="", Period=None, e=None, a=None, i=None, Omega=None, pi=None, l=None,
                  Mass=None, n=None, k=None, Q=None, r=None):
-        # print(kwargs)
-        self.name = Name
+        self.Name = Name
         self.period = Period
         self.e = e
         self.a = a
         self.i = i
-        self.omega = Omega
-        self.omega_bar = omega_bar
+        self.Omega = Omega
+        self.pi = pi
         self.l = l 
-        # self.z0 = self.i*np.exp(1j*self.omega)
-        self.mass = Mass
+        self.Mass = Mass
         self.r = r
         self.n = n
         self.k = k
         self.Q = Q
-        self.units = {'a' : 'AU', 'mass' : 'M_EARTH', 'period' : 'days', 'i' : 'degrees', 'omega' : 'degrees', 'omega_bar' : 'degrees', 'n' : 'degrees yr^(-1)'}
+        self.units = {'a' : 'AU', 'mass' : 'M_EARTH', 'period' : 'days', 'i' : 'degrees', 'omega' : 'degrees',
+                      'pi' : 'degrees', 'n' : 'degrees yr^(-1)', 'l' : 'degrees', 'r' : 'm', }
         # print(self.units)
 
-    def update_unit(self, attribute, unit_to_update):
-        """
-        Updates the units post conversion.
-
-        Args:
-            attribute (str): Name of planet attribute.
-            unit_to_update (str): The name of the new units.
-        """
-        self.units[attribute] = unit_to_update
-
-    def toString(self):
+    def __str__(self):
         unit_keys = list(self.units.keys())
         # print(unit_keys)
+        output = ''
         for attr in self.__dict__:
             if attr is not 'units':
                 if self.__dict__[attr] is not None:
                     if attr in unit_keys:
-                        print('{} : {} {}'.format(attr, self.__dict__[attr], self.units[attr]))
+                        output += '{} : {:.5g} {}\n'.format(attr, self.__dict__[attr], self.units[attr])
                     else:
-                        print('{} : {}'.format(attr, self.__dict__[attr]))
-        print()
-
-
-
-'''
-dict containing units in function that updates dict of units.
-'''
+                        if attr == 'name':
+                            output += '{} : {}\n'.format(attr, self.__dict__[attr])
+                        else:
+                            output += '{} : {:.5g}\n'.format(attr, self.__dict__[attr])
+        return output
 
 # def print_kwargs(**kwargs):
 #     for a in kwargs:
 #         print(a, kwargs[a])
 
 if __name__ == "__main__":
-    planets = pd.read_csv('solar_system.csv')
+    planets = pd.read_csv('SolarSystemData/solar_system.csv')
     idx = 2
     planet_b = planet(**planets.ix[idx])
     # planet_b.mass *= 6*10**24; planet_b.update_unit('mass', 'kg')
-    planet_b.toString()
+    print(planet_b)
