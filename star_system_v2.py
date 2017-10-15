@@ -45,6 +45,10 @@ def real_scaling_factor_and_phase(x1, *boundaries):
     actual_f = f(x, *boundaries)
     return [np.real(actual_f[0]), np.imag(actual_f[0]), np.real(actual_f[1]), np.imag(actual_f[1])]
 
+def scaling_factor_and_phase(p, *boundaries):
+    s, phase = p
+    return (s*np.sin(phase)-boundaries[0], s*np.cos(phase)-boundaries[1])
+
 class star_System():
     """
     Stores the mass and radius of the star. Also stores the properties of the orbiting planets.
@@ -147,16 +151,14 @@ class star_System():
         n = self.get_property_all_planets('n')*np.pi/180
         a = self.get_property_all_planets('a')
         e = self.get_property_all_planets('e')
+
         n_planets = len(self.planets)
-        # f_mat = np.zeros([n_planets, n_planets])
-        f_mat = np.zeros([n_planets, n_planets], dtype='complex128')
+        f_mat = np.zeros([n_planets, n_planets])
+        # f_mat = np.zeros([n_planets, n_planets], dtype='complex128')
 
         j_laplace_coeff_jk, j_laplace_coeff_jj = 2, 1
         front_factor = -1
- 
         gr_correction = 3*(a)**2*(n)**2/(LIGHT_SPD**2*(1+m/M))*1/(1-e**2)
-        # print(M)
-        # print(3*(a)**2*(n)**2/(LIGHT_SPD**2))
 
         for j in range(n_planets):
             for k in range(n_planets):
@@ -177,12 +179,11 @@ class star_System():
                             laplace_coeff = calculate_laplace_coeff(alpha_jj, j_laplace_coeff_jj, 3/2)
                             alpha_jj_bar = np.where(a[kk] < a[j], 1, alpha_jj)
                             f_mat[j, k] += (1/4)*(m[kk]/(M+m[j]))*alpha_jj*alpha_jj_bar*laplace_coeff
-                    # f_mat[j, k] += J2_correction[j]
-                    # f_mat[j, k] += 1j*ecc_damp[j]
                     f_mat[j, k] += gr_correction[j]
                     f_mat[j, k] *= -front_factor*(n[j])
                     # print(J2_correction[j], ecc_damp[j], gr_correction[j])
-        return f_mat#*180/np.pi
+        # print(f_mat[0, 0], gr_correction[0])
+        return f_mat
 
     
     def initial_conditions(self):
@@ -196,8 +197,8 @@ class star_System():
         e = self.get_property_all_planets('e')
         pi = self.get_property_all_planets('pi')*np.pi/180
 
-        h = np.array(e*np.sin(pi), dtype='complex128')
-        k = np.array(e*np.cos(pi), dtype='complex128')
+        h = np.array(e*np.sin(pi))
+        k = np.array(e*np.cos(pi))
 
         return h, k
 
@@ -223,13 +224,12 @@ class star_System():
         k_solved = self.solve_property(x, init_conditions[1, :])
 
         n = len(self.planets)
-        S, beta = np.zeros(n, dtype='complex128'), np.zeros(n, dtype='complex128')
+        S, beta = np.zeros(n), np.zeros(n)
 
         for i in range(n):
-            # S[i], beta[i] = fsolve(scaling_factor_and_phase, (1, -1), args=(h_solved[i], k_solved[i],))
-            # T[i], gamma[i] = fsolve(scaling_factor_and_phase, (-1, 1), args=(p_solved[i], q_solved[i],))
-            S_real, S_img, beta_real, beta_img = fsolve(real_scaling_factor_and_phase, (1, 1, -1, -1), args=(h_solved[i], k_solved[i],))
-            S[i], beta[i] = S_real+1j*S_img, beta_real+1j*beta_img
+            S[i], beta[i] = fsolve(scaling_factor_and_phase, (1, -1), args=(h_solved[i], k_solved[i],))
+            # S_real, S_img, beta_real, beta_img = fsolve(real_scaling_factor_and_phase, (1, 1, -1, -1), args=(h_solved[i], k_solved[i],))
+            # S[i], beta[i] = S_real+1j*S_img, beta_real+1j*beta_img
             
         return S, beta
 
@@ -341,7 +341,7 @@ class star_System():
         names = self.get_property_all_planets('Name')
         plot_simulation_separate(t/10**6, eccentricities, 'Time (Myr)', 'Eccentricity', names)
 
-        mean_ecc = self.mean_eccentricities(x)
+        # mean_ecc = self.mean_eccentricities(x)
 
         for e, ecc in enumerate(eccentricities):
             print(self.planets[e].Name, np.mean(ecc), np.max(ecc), np.min(ecc))
@@ -368,10 +368,10 @@ def plot_simulation_separate(t_data=None, y_data=None, xlabel="", ylabel="", dat
         plt.subplots_adjust(top=0.95, right=0.95, left=0.11, bottom=0.11)
 
 if __name__ == "__main__":
-    star_name = 'HD_217107'
+    star_name = list('55 Cnc'); star_name[2] = '_'; star_name = "".join(star_name)
+
     star_sys = star_System('StarSystemData/'+star_name+'/star.csv', 'StarSystemData/'+star_name+'/planets.csv')
-    # A, B = [star_sys.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12)) for mat_id in ['A', 'B']]
-    t = np.linspace(0, 10*10**4, 5000)+0j
+    t = np.linspace(0, 10*10**4, 5000)
     star_sys.simulate(t)
     # print(star_sys)
     # plt.show()
