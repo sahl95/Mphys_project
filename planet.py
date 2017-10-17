@@ -3,6 +3,7 @@ Object to store planet orbital properties.
 '''
 
 import pandas as pd
+import numpy as np
 
 class planet():
     """
@@ -38,7 +39,15 @@ class planet():
         self.Q = Q
         self.units = {'a' : 'AU', 'mass' : 'M_EARTH', 'period' : 'days', 'i' : 'degrees', 'omega' : 'degrees',
                       'pi' : 'degrees', 'n' : 'degrees yr^(-1)', 'l' : 'degrees', 'r' : 'm', }
-        # print(self.units)
+        
+        if np.isnan(self.i) or self.i == None:
+            self.i = 0
+
+        if np.isnan(self.pi) or self.pi == None:
+            self.pi = 0
+        
+        if self.Omega == None:
+            self.Omega = 0
 
     def __str__(self):
         unit_keys = list(self.units.keys())
@@ -50,7 +59,7 @@ class planet():
                     if attr in unit_keys:
                         output += '{} : {:.5g} {}\n'.format(attr, self.__dict__[attr], self.units[attr])
                     else:
-                        if attr == 'name':
+                        if attr == 'name' or attr == 'Name':
                             output += '{} : {}\n'.format(attr, self.__dict__[attr])
                         else:
                             output += '{} : {:.5g}\n'.format(attr, self.__dict__[attr])
@@ -62,7 +71,8 @@ class planet():
 
 if __name__ == "__main__":
     planets = pd.read_csv('SolarSystemData/solar_system.csv')
-    idx = 2
+    planets = pd.read_csv('Exoplanets_data/HD217107.csv')
+    idx = 0
     planet_b = planet(**planets.ix[idx])
     # planet_b.mass *= 6*10**24; planet_b.update_unit('mass', 'kg')
     print(planet_b)

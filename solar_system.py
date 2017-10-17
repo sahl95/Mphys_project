@@ -63,9 +63,10 @@ class solar_System():
         starRadius (float): The radius of the Sun in solar radii.
         planet_data_file (str): A data file containing planet orbital properties.
     """
-    def __init__(self, starMass, starRadius, planet_data_file):
-        self.star_mass = starMass
-        self.star_radius = starRadius
+    def __init__(self, star_data_file, planet_data_file):
+        star_data = pd.read_csv(star_data_file)
+        self.star_mass = star_data['star_mass'][0]
+        self.star_radius = star_data['star_radius'][0]
         self.planets = self.add_planets(planet_data_file)
 
     def add_planets(self, planet_data_file):
@@ -105,7 +106,7 @@ class solar_System():
 
 
 
-    def frequency_matrix(self, matrix_id, J2=0, J4=0):
+    def frequency_matrix(self, matrix_id, J2=0, J4=0, do_ecc_damp=False):
         r"""
         Calculates the frequency matrix with the following correction terms included:
 
@@ -150,9 +151,11 @@ class solar_System():
         n = self.get_property_all_planets('n')*np.pi/180
         a = self.get_property_all_planets('a')
         e = self.get_property_all_planets('e')
-        k = self.get_property_all_planets('k')
-        Q = self.get_property_all_planets('Q')
-        r = self.get_property_all_planets('r')/AU
+
+        if do_ecc_damp:
+            k = self.get_property_all_planets('k')
+            Q = self.get_property_all_planets('Q')
+            r = self.get_property_all_planets('r')/AU
         n_planets = len(self.planets)
         # f_mat = np.zeros([n_planets, n_planets])
         f_mat = np.zeros([n_planets, n_planets], dtype='complex128')
@@ -161,7 +164,7 @@ class solar_System():
             j_laplace_coeff_jk, j_laplace_coeff_jj = 2, 1
             front_factor = -1
             J2_correction = (((3/2)*J2*(R/a)**2)-((9/8)*(J2**2)*(R/a)**4)-((15/4)*J4*(R/a)**4))
-            ecc_damp = (63/4)*(k/(1.5*Q))*(M/m)*(r/a)**5
+            if do_ecc_damp: ecc_damp = (63/4)*(k/(1.5*Q))*(M/m)*(r/a)**5
             gr_correction = 3*(a)**2*(n)**2/(LIGHT_SPD**2*(1+m/M))*1/(1-e**2)
             # gr_correction[0] = 3*(a[0]/AU)**2*(n[0])**3/(LIGHT_SPD**2*(1+m[0]/M))*1/(1-e[0]**2)
             # print((63/4)*(k/(1.5*Q))*(M/m)*(r/a)**5)
@@ -171,7 +174,7 @@ class solar_System():
             front_factor = 1
             J2_correction = (((3/2)*J2*(R/a)**2)-((27/8)*(J2**2)*(R/a)**4)-((15/4)*J4*(R/a)**4))
             gr_correction = np.zeros(n_planets)
-            ecc_damp = np.zeros(n_planets)
+            if do_ecc_damp: ecc_damp = np.zeros(n_planets)
             # n_merc = np.sqrt(G_CONST*M/a[0]**3)
 
         for j in range(n_planets):
@@ -194,7 +197,7 @@ class solar_System():
                             alpha_jj_bar = np.where(a[kk] < a[j], 1, alpha_jj)
                             f_mat[j, k] += (1/4)*(m[kk]/(M+m[j]))*alpha_jj*alpha_jj_bar*laplace_coeff
                     f_mat[j, k] += J2_correction[j]
-                    f_mat[j, k] += 1j*ecc_damp[j]
+                    if do_ecc_damp: f_mat[j, k] += 1j*ecc_damp[j]
                     f_mat[j, k] += gr_correction[j]
                     f_mat[j, k] *= -front_factor*(n[j])
                     # print(J2_correction[j], ecc_damp[j], gr_correction[j])
@@ -490,7 +493,8 @@ class solar_System():
         return [rx, ry, rz]
 
     def simulate(self, t, plot_orbit=False, plot=False, separate=True):
-        A, B = [self.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12)) for mat_id in ['A', 'B']]
+        A, B = [self.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12),
+                                      do_ecc_damp=True) for mat_id in ['A', 'B']]
         g, x, f, y = *np.linalg.eig(A), *np.linalg.eig(B)
         S, beta, T, gamma = self.find_all_scaling_factor_and_phase(x, y)
         # print(g*100*180/np.pi*3600, '\n')
@@ -539,7 +543,6 @@ class solar_System():
                 plt.xlabel('x (AU)')
                 plt.ylabel('y (AU)')
 
-
                 df = pd.DataFrame({"time": t ,"x" : xyz[0], "y" : xyz[1], "z" : xyz[2]})
                 df.to_csv('Animate_solar_system/'+str(idx+1)+'_'+names[idx]+'_xyz.csv', index=False)
 
@@ -563,7 +566,7 @@ class solar_System():
         return eccentricities, inclinations
 
 def plot_simulation_separate(t_data=None, y_data=None, xlabel="", ylabel="", data_labels=None):
-    for idx in range(len(star_system.planets)):
+    for idx in range(len(data_labels)):
         plt.figure()
         plt.plot(t_data, y_data[idx], 'b-', label=data_labels[idx])
         plt.axvline(linestyle='--', color='r')
@@ -620,7 +623,7 @@ if __name__ == "__main__":
     names = pd.read_csv('SolarSystemData/solar_system.csv')['Name']
     # for n in names:
     # print(n)
-    star_system = solar_System(1., 1., 'SolarSystemData/no_ven_jup.csv')
+    star_system = solar_System('SolarSystemData/Sun.csv', 'SolarSystemData/solar_system.csv')
     # star_system = solar_System(1., 1., 'SolarSystemData/'+n+'.csv')
     # t = np.linspace(-10*10**6, 10*10**6, 10000)+0j
     # t = np.linspace(-5*10**6, 5*10**6, 10000)+0j
