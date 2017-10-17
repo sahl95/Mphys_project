@@ -10,6 +10,7 @@ from scipy.optimize import fsolve
 from sympy import symbols, Matrix, linsolve, diag
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.animation
 from planet import planet
 
 
@@ -211,13 +212,13 @@ class solar_System():
             * :math:`q` (*numpy array*)
         """
         e = self.get_property_all_planets('e')
-        omega_bar = self.get_property_all_planets('pi')*np.pi/180
+        pi = self.get_property_all_planets('pi')*np.pi/180
         i = self.get_property_all_planets('i')*np.pi/180
         omega = self.get_property_all_planets('Omega')*np.pi/180
 
-        h = np.array(e*np.sin(omega_bar), dtype='complex128')
-        k = np.array(e*np.cos(omega_bar), dtype='complex128')
-        p = np.array(i*np.sin(omega), dtype='complex128')
+        h = np.array(e*np.sin(pi), dtype='complex128')
+        k = np.array(e*np.cos(pi), dtype='complex128')
+        p = np.array(i*np.sin(omega), dtype='complex128')  # WHY DIVIDE BY 2 TO MATCH LASKAR 1986
         q = np.array(i*np.cos(omega), dtype='complex128')
 
         return h, k, p, q
@@ -243,6 +244,7 @@ class solar_System():
         x, y = eigenvectors_of_A, eigenvectors_of_B
 
         init_conditions = np.array(self.initial_conditions())
+        # print(init_conditions[:, 3])
         h_solved = self.solve_property(x, init_conditions[0, :])
         k_solved = self.solve_property(x, init_conditions[1, :])
         p_solved = self.solve_property(y, init_conditions[2, :])
@@ -451,7 +453,7 @@ class solar_System():
         n = self.get_property_all_planets('n')#/(SECS_IN_YEAR)*np.pi/180
         a = self.get_property_all_planets('a')
         # l = self.get_property_all_planets('l')*np.pi/180
-        # pi = self.get_property_all_planets('omega_bar')*np.pi/180
+        # pi = self.get_property_all_planets('pi')*np.pi/180
 
         # # T = 2*np.pi*np.sqrt(((a[idx]*AU)**3)/(G_CONST*self.star_mass*M_SUN))/SECS_IN_YEAR
         # # print(T)
@@ -505,6 +507,8 @@ class solar_System():
         eccentricities = self.get_eccentricity(h_list, k_list)
         inclinations = self.get_inclination(p_list, q_list)
         names = self.get_property_all_planets('Name')
+
+        t = np.real(t)
         if plot:
             if separate:
                 plot_simulation_separate(t/10**6, eccentricities, 'Time (Myr)', 'Eccentricity', names)
@@ -513,7 +517,6 @@ class solar_System():
                 plot_simulation_all(t/10**6, eccentricities, 'Time (Myr)', 'Eccentricity', names)
                 plot_simulation_all(t/10**6, inclinations*180/np.pi, 'Time (Myr)', 'Inclination', names)
 
-        t = np.real(t)
         if plot_orbit:
             x, y, z = np.zeros(2), np.zeros(2), np.zeros(2)
             fig = plt.figure(figsize=(6, 6))
@@ -524,6 +527,10 @@ class solar_System():
             for idx in range(len(self.planets)):
                 xyz = self.kep2cart(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
                 # ax.plot(X, Y, '.', markersize=2, label=names[idx])
+                # if idx == 2:
+                #     ax.plot(xyz[0][80:], xyz[1][80:], xyz[2][80:], '--', markersize=2, label=names[idx], zorder=-idx)
+                # else:
+                #     ax.plot(*xyz, '--', markersize=2, label=names[idx], zorder=-idx)
                 ax.plot(*xyz, '.', markersize=2, label=names[idx], zorder=-idx)
                 ax.set_zlim(-np.max([np.max(xyz[0]), np.max(xyz[1])]), np.max([np.max(xyz[0]), np.max(xyz[1])]))
                 ax.set_ylim(-np.max([np.max(xyz[0]), np.max(xyz[1])]), np.max([np.max(xyz[0]), np.max(xyz[1])]))
@@ -531,8 +538,10 @@ class solar_System():
                 ax.set_zlabel('z (AU)')
                 plt.xlabel('x (AU)')
                 plt.ylabel('y (AU)')
-            # print(np.mean(np.sqrt(X**2+Y**2+Z**2)))
-            # plt.legend()
+
+
+                df = pd.DataFrame({"time": t ,"x" : xyz[0], "y" : xyz[1], "z" : xyz[2]})
+                df.to_csv('Animate_solar_system/'+str(idx+1)+'_'+names[idx]+'_xyz.csv', index=False)
 
         precession_rates, xlabel = self.get_perihelion_precession_rates(A, eccentricities, h_list, k_list), 'Pericenter'
         # precession_rates, xlabel = self.get_ascending_node_precession_rates(B, inclinations*180/np.pi, p_list, q_list), 'Ascending node'
@@ -611,14 +620,15 @@ if __name__ == "__main__":
     names = pd.read_csv('SolarSystemData/solar_system.csv')['Name']
     # for n in names:
     # print(n)
-    star_system = solar_System(1., 1., 'SolarSystemData/solar_system.csv')
+    star_system = solar_System(1., 1., 'SolarSystemData/no_ven_jup.csv')
     # star_system = solar_System(1., 1., 'SolarSystemData/'+n+'.csv')
     # t = np.linspace(-10*10**6, 10*10**6, 10000)+0j
     # t = np.linspace(-5*10**6, 5*10**6, 10000)+0j
-    t = np.linspace(0, 1000, 1508)+0j
+    # t = np.linspace(-10., 0, 1006)+0j
     # t = np.linspace(-100000, 100000, 3508)+0j
-    eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=True, plot=False, separate=False)
+    t = np.linspace(-6, 3, 608)+0j
+    eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=True, plot=False, separate=True)
     # print(star_system)
-    plt.show()
+    # plt.show()
 
-# Try calculating de/dt from expression for e = (np.sqrt(h**2+k**2))
+# WHY DOES VENUS AFFECT EARTHS ORBIT AT THE BEGINNING??????
