@@ -15,6 +15,15 @@
 \usepackage{subcaption}
 \captionsetup{belowskip=10pt,aboveskip=4pt}
 
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\Large\bfseries}{Week \thesection:}{1em}{}
+
+\usepackage[titles]{tocloft}
+\renewcommand{\cftsecpresnum}{Week\space}
+\newlength\mylength
+\settowidth\mylength{\cftsecpresnum}
+\addtolength\cftsecnumwidth{\mylength}
+
 \usepackage{array}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
  % Custom command to centre stuff in tables.
@@ -173,7 +182,7 @@ columns=fullflexible,
 \pagenumbering{arabic}
 \pagestyle{fancy}
 
-\section{Week 1: September 11$^{th}-$17$^{th}$ 2017}
+\section{September 11$^{th}-$17$^{th}$ 2017}
 
 \subsection{Storing planet data}
 \label{Planet}
@@ -415,12 +424,12 @@ AU = 149597870700
         return B, eigenvalues, eigenvectors
 \end{lstlisting}
 
-\section{Week 2: September 18$^{th} - $24$^{th}$ 2017}
+\section{September 18$^{th} - $24$^{th}$ 2017}
 
 \newpage
 
 
-\section{Week 3: September 25$^{th} - $31$^{st}$ 2017}
+\section{September 25$^{th} - $31$^{st}$ 2017}
 
 \subsection{Simulation of solar system}
 
@@ -496,7 +505,7 @@ Where $n_{j}$ is the mean orbital frequency, $a_{j}$ is the semi-major axis, and
    \begin{aligned}
    \begin{split}
    A_{jj} = n_{j} & \left [ \frac{3}{2}J_{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{2} -  \frac{9}{8}J_{2}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} -  \frac{15}{4}J_{4}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} \vphantom{\sum _{k\neq}} \right. \\
-    & \left. + \frac{1}{4} \sum _{k\neq i} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \vphantom{\sum _{k\neq}} \right]
+    & \left. + \frac{1}{4} \sum _{k\neq j} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \vphantom{\sum _{k\neq}} \right]
     \end{split}
 \end{aligned}
 \end{equation}
@@ -507,13 +516,13 @@ Where $n_{j}$ is the mean orbital frequency, $a_{j}$ is the semi-major axis, and
     \begin{equation}
    \begin{aligned}
    \begin{split}
-   B_{jj} = n_{j} & \left [ \frac{3}{2}J_{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{2} -  \frac{27}{8}J_{2}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} -  \frac{15}{4}J_{4}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} \vphantom{\sum _{k\neq}} \right. \\
-    & \left. + \frac{1}{4} \sum _{k\neq i} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \vphantom{\sum _{k\neq}} \right]
+   B_{jj} = -n_{j} & \left [ \frac{3}{2}J_{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{2} -  \frac{27}{8}J_{2}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} -  \frac{15}{4}J_{4}^{2} \left ( \frac{R_{\star}}{a_{j}} \right)^{4} \vphantom{\sum _{k\neq}} \right. \\
+    & \left. + \frac{1}{4} \sum _{k\neq j} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \vphantom{\sum _{k\neq}} \right]
     \end{split}
 \end{aligned}
 \end{equation}
    \begin{equation}
-   B_{jk} = -\frac{n_{j}}{4} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \hspace*{1.9cm} (j \neq k).
+   B_{jk} = \frac{n_{j}}{4} \frac{m_{k}}{m_{\star}+m_{j}} \alpha_{jk} \bar{\alpha}_{jk} b_{3/2}^{(1)}(\alpha_{jk}) \hspace*{2.35cm} (j \neq k).
    \end{equation}
 \end{subequations}
 Where $m$ is the mass, $\alpha < 1$ is the semi-major axis ratio, $\bar{\alpha} = 1 \text{ if } a_{k} < a_{j}$, $\bar{\alpha} = \alpha$ if $a_{j}<a_{k}$, $J_{2}$ and $J_{4}$ are the first two zonal gravity coefficients, and the laplace coefficients are defined by:
@@ -527,7 +536,7 @@ def calculate_laplace_coeff(alpha, j, s):
                           0, 2*np.pi, args=(alpha, j, s,))[0]/np.pi
 \end{lstlisting}
 
-And the equations of motion are given by:
+And the vertical and horizontal components of the eccentricity and inclination are given by:
 \begin{subequations}
 \begin{gather}
 \label{eq:h}
@@ -647,7 +656,7 @@ A similar process can be done with $k_{j}$ to solve for $S_{i}\cos \beta_{i}$:
 
 Solving the above two matrices gives one set of equations in terms of $S_{i} \sin \beta_{i}$ and another set of equations in terms of $S_{i} \cos \beta_{i}$. Solving them simultaneously results in values for $S_{i}$ and $\beta_{i}$. A similar process can be done to solve for $T_{i}$ and $\gamma_{i}$.
 
-\begin{lstlisting}[language=Python, caption={Equations for simultaneously solving for the scale factor and phase in Code \ref{s_phase}}]
+\begin{lstlisting}[language=Python, caption={Equations for simultaneously solving for the scale factor and phase in Code \ref{s_phase}}, label=solveS_Phase]
 def scaling_factor_and_phase(p, *boundaries):
     s, phase = p
     return (s*np.sin(phase)-boundaries[0], s*np.cos(phase)-boundaries[1])
@@ -688,8 +697,8 @@ def scaling_factor_and_phase(p, *boundaries):
 
 Once the scale factors and phases have been found, equations \ref{hk} and \ref{pq} can now be solved at any time $t$.
 
-\begin{lstlisting}[language=Python, caption={Calculating the equations of motion}, firstnumber=103]
-    def eq_of_motion(self, scaled_eigenvector, eigenvalue, phase, t, eq_id):
+\begin{lstlisting}[language=Python, caption={Calculating the vertical and horizontal components of the eccentricity and inclination}, firstnumber=103]
+    def components_of_ecc_inc(self, scaled_eigenvector, eigenvalue, phase, t, eq_id):
         # eq_id = 'h', 'k', 'p', 'q'
         kwargs = {'scaled_eigenvector' : scaled_eigenvector, 'eigenvalue' : eigenvalue, 'phase' : phase, 't' : t}
         if eq_id == 'h' or eq_id == 'p':
@@ -728,22 +737,20 @@ Finally, the eccentricity and inclination at any time $t$ can be calculated usin
    \end{equation}
 \end{subequations}
 \begin{lstlisting}[language=Python, caption={Calculating the eccentricity and inclination}, firstnumber=131]
-    def get_eccentricity(self, scaled_eigenvector_of_A, eigenvalue_of_A, beta, t):
+    def get_eccentricity(self, h_arr, k_arr):
         n = len(self.planets)
-        kwargs = {'scaled_eigenvector' : scaled_eigenvector_of_A, 'eigenvalue' : eigenvalue_of_A, 'phase' : beta, 't' : t}
+        h, k = h_arr, k_arr
         eccentricities = []
-        h, k = self.eq_of_motion(**kwargs, eq_id='h'), self.eq_of_motion(**kwargs, eq_id='k')
         for j in range(n):  
-            eccentricities.append(np.sqrt(h[j]**2+k[j]**2))
+            eccentricities.append(np.real(np.sqrt(h[j]*np.conjugate(h[j])+k[j]*np.conjugate(k[j]))))
         return np.array(eccentricities)
 
-    def get_inclination(self, scaled_eigenvector_of_B, eigenvalue_of_B, gamma, t):
+    def get_inclination(self, p_arr, q_arr):
         n = len(self.planets)
-        kwargs = {'scaled_eigenvector' : scaled_eigenvector_of_B, 'eigenvalue' : eigenvalue_of_B, 'phase' : gamma, 't' : t}
+        p, q = p_arr, q_arr
         inclinations = []
-        p, q = self.eq_of_motion(**kwargs, eq_id='p'), self.eq_of_motion(**kwargs, eq_id='q')
-        for j in range(n):
-            inclinations.append(np.sqrt(p[j]**2+q[j]**2))
+        for j in range(n):  
+            inclinations.append(np.real(np.sqrt(p[j]*np.conjugate(p[j])+q[j]*np.conjugate(q[j]))))
         return np.array(inclinations)
 \end{lstlisting}
 
@@ -1026,7 +1033,7 @@ The effect of the oblateness of the Sun on the precession rate of Mercury was al
 \
 \newpage
 
-\section{Week 4: October 1$^{st} - $8$^{th}$ 2017}
+\section{October 1$^{st} - $8$^{th}$ 2017}
 
 \subsection{Keplerian to Cartesian coordinates}
 
@@ -1050,7 +1057,7 @@ using the Newton-Raphson method:
 \begin{equation}
 E_{j+1} = E_{j} - \frac{f(E_{j})}{\frac{d}{dE_{j}}f(E_{j})} = E_{j} - \frac{E_{j} - e\sin E_{j} - M}{1-e\cos E_{j}}, \hspace*{1cm} E_{0}=M
 \end{equation}
-The above equation was iterated until $E_{j+1} = E_{j}$. Then the trua anomaly $\nu(t)$ was calculated using
+The above equation was iterated until $E_{j+1} = E_{j}$. Then the true anomaly $\nu(t)$ was calculated using
 \begin{equation}
 \nu(t) = 2 \, \text{arctan2} \left (\sqrt{1+e} \sin \frac{E(t)}{2}, \sqrt{1-e} \cos \frac{E(t)}{2} \right).
 \end{equation}
@@ -1151,6 +1158,7 @@ General Relativity (GR) corrections add an additional term to $\dot{\varpi}_{j}$
 This term is added to the diagonal elements of $\mathbf{A}$ to accounts for the effects of GR.
 
 \subsection{Test of GR correction}
+\label{GRcor}
 
 To test the effects of GR on the precession rates $\dot{\varpi}$, each planet was simulated by itself and its precession rate was calculated. The effect of GR on $\dot{\varpi}$, in arc seconds per century, of each planet is shown below
 
@@ -1194,7 +1202,7 @@ The inclusion of GR had the largest effect on Mercury, as expected. This can be 
 
 \newpage
 
-\section{Week 5: October 9$^{th} - $15$^{th}$ 2017}
+\section{October 9$^{th} - $15$^{th}$ 2017}
 
 \subsection{Eccentricity damping corrections}
 
@@ -1204,18 +1212,686 @@ We assume that the tides raised by planets are more dominant relative to tides r
 \end{equation}
 Where $R$ is the radius of the planet, $Q{}' \equiv 1.5Q/k_{2}$ is the modified tidal quality factor. $Q$ is the tidal quality factor and $k_{2}$ is the Love number of degree 2 of the planet. All other terms are the same as before. The values of $Q$ and $k_{2}$ are taken from Goldreich \& Sotter (1966)\cite{Goldreich1966}, Zhang (1992)\cite{Zhang1992}, and Gavrilov \& Kharkov (1977)\cite{Gavrilov1977}. Similarly to the GR correction, $\sqrt{-1}\lambda$ is added to diagonal elements of $\mathbf{A}$ to account for the effect of tides.
 
+Since the correction involved complex numbers, the code had to be adapted to work with complex numbers as opposed to real numbers. To do this, all data containers now store \texttt{dtype=`complex128'}. The only major change involved altering Code \ref{solveS_Phase} for solving for the scale factors and phase and is outline below.
+\begin{lstlisting}[language=Python, caption={Change to Code \ref{solveS_Phase}}]
+def f(x, *boundaries):
+    s_factor, phase = x
+    return [s_factor*np.sin(phase)-boundaries[0], s_factor*np.cos(phase)-boundaries[1]]
+
+def real_scaling_factor_and_phase(x1, *boundaries):
+    s_factor, phase = x1[0]+1j*x1[1], x1[2]+1j*x1[3] 
+    x = [s_factor, phase]
+    actual_f = f(x, *boundaries)
+    return [np.real(actual_f[0]), np.imag(actual_f[0]), np.real(actual_f[1]), np.imag(actual_f[1])]
+\end{lstlisting}
+
 \subsection{Test of eccentricity damping}
 
 As before with GR, the effect of eccentricity damping is tested on the precession rate of the planets. It was found that this additional had no effect, at least on timescales of a few million years. However, for the Solar System, only a small change is expected, on timescales of billions of years.
 
-\subsection{Simulating other 2 planet systems}
+\subsection{Animating the Solar System}
 
+To be able to perform quick visual tests of the simulation (a few years at a time), code was written to create an animation of the solar system.
+
+\begin{lstlisting}[language=Python, caption={Animating the Solar System}]
+mport numpy as np
+import pylab
+import glob
+import os
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.animation
+import pandas as pd
+
+files = glob.glob('Animate_solar_system/*.csv')
+files.sort(key=os.path.getmtime)
+files = "\n".join(files).split('\n')
+
+n_planets = 4
+colours = ['r', 'orange', 'b', 'g', 'brown', 'r', 'orange', 'b', 'g']
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ttl = ax.text(0, 1.05, 0, 'Time = years', transform = ax.transAxes, va='center')
+
+all_x, all_y, all_z = [], [], []
+points = []
+for idx in range(n_planets):
+    points.append(None)
+    
+    df = pd.read_csv(files[idx])
+    x, y, z = np.array(df.x), np.array(df.y), np.array(df.z)
+    all_x.append(x)
+    all_y.append(y)
+    all_z.append(z)
+xyz = np.array([all_x, all_y, all_z])
+
+def update_graph(num):
+    global points
+    global ttl
+    data=df
+
+    for idx in range(n_planets):
+        if points[idx] is not None:
+            points[idx].set_color(colours[idx])
+            points[idx].set_markersize(1)
+        points[idx], = ax.plot(all_x[idx][num:num+1], all_y[idx][num:num+1], all_z[idx][num:num+1], linestyle="", marker="o", color=colours[idx])
+    ttl.set_text('Time = {:.2f} years'.format(df.time[num]))
+    if num%5 == 0 and num > 10:
+        if num%25 == 0:
+            plt.cla()
+            ttl = ax.text(0, 1.05, 0, '', transform = ax.transAxes, va='center')
+            ax.plot(x0, y0, z0, 'b*', markersize=3, zorder=-999)
+            ax.set_zlabel('z (AU)')
+            ax.set_xlabel('x (AU)')
+            ax.set_ylabel('y (AU)')
+        
+        ttl.set_text('Time = {:.2f} years'.format(df.time[num]))
+        for idx in range(n_planets):
+            ax.plot(all_x[idx][:num-1], all_y[idx][:num-1], all_z[idx][:num-1], linestyle="", marker="o", color=colours[idx], markersize=1)
+            max_axis = np.max([np.abs(np.min(xyz)), np.max(xyz)])
+            ax.set_zlim(-max_axis, max_axis)
+            ax.set_ylim(-max_axis, max_axis)
+            ax.set_xlim(-max_axis, max_axis)
+    return graph, 
+
+x0, y0, z0 = np.zeros(2), np.zeros(2), np.zeros(2)
+graph, = ax.plot(x0, y0, z0, 'b*', markersize=3, zorder=-999)
+
+ax.view_init(45, 45)
+max_axis = np.max([np.abs(np.min(xyz)), np.max(xyz)])
+ax.set_zlim(-max_axis, max_axis)
+ax.set_ylim(-max_axis, max_axis)
+ax.set_xlim(-max_axis, max_axis)
+ax.set_zlabel('z (AU)')
+ax.set_xlabel('x (AU)')
+ax.set_ylabel('y (AU)')
+
+ani = matplotlib.animation.FuncAnimation(fig, update_graph, len(x), 
+                               interval=1, save_count=50, repeat=False) 
+ani.save('Animate_solar_system/Plots/rocky_planets.mp4', fps=24)
+\end{lstlisting}
+
+After viewing the animation it was found that all the planets behaved normally with 1 exception; Earth. The behaves normally at all times $t < 0$ years. However during $0 \leq t \leq 1$ years, the Earth behaves in an unexpected manner, at $t > 1$ years, the behaviour of the Earth returns to normal.  This behaviour is also only seen if both Venus and Jupiter are present in the simulation.
+
+The cause of this bug is unknown for now. However it does not have any effect on long term simulations (as seen by results in \S\ref{GRcor}) due to the very short duration of the bug. Hence, the simulation can now be tested on other star systems.
+
+\subsection{Simulating other planet systems}
+
+\subsubsection{Extracting data}
+
+
+The data of other star systems were taken from \href{https://exoplanetarchive.ipac.caltech.edu/}{Nasa Exoplanet Archive}. To aid in the extraction of data, a web crawler that takes the star alias as the argument was written.
+
+\begin{lstlisting}[language=Python, caption={Extracting data from \href{https://exoplanetarchive.ipac.caltech.edu/}{Nasa Exoplanet Archive}}]
+import glob
+import os
+import sys
+from bs4 import BeautifulSoup
+from unidecode import unidecode
+import requests
+import numpy as np
+import pandas as pd
+from scipy import stats
+import numpy.ma as ma
+
+def mean_data(obj_id):
+	'''''
+	Extracts the mean data of each planet in the star system.
+	'''''
+    obj_id_split = obj_id.split(' ')
+    obj_id = obj_id_split[0]
+    output_id = obj_id_split[0]
+    for i in range(1, len(obj_id_split)):
+        obj_id += '+'+obj_id_split[i]
+        output_id += '_'+obj_id_split[i]
+
+    url = "https://exoplanetarchive.ipac.caltech.edu/cgi-bin/ExoOverview/nph-ExoOverview?objname={}&type=&label&aliases&exo&iden&orb&ppar&tran&note&disc&ospar&ts&nalc&force=&dhxr1507830887922".format(obj_id)
+    response = requests.get(url)
+
+    bs = BeautifulSoup(response.content, "html.parser")
+
+    for idx, title in enumerate(bs.findAll('div', {'class': 'data'})):
+        name = title.find('th').text
+        if name == 'Planet Orbital Properties':
+            index = idx
+
+    planet_props = bs.findAll('div', {'class': 'data'})
+
+    column_names = []
+    planets = []
+    p_idx = 0
+
+    for idx, text in enumerate(planet_props[index].findAll()):
+        text = unidecode(str(text))
+
+        if 'th' in text:
+            if 'class' not in text:
+                if 'Reference' not in text:
+                    if 'href' not in text:
+                        column_names.append(text[4:-5])
+
+        if idx > 1:
+            text_split = text.split('\n')
+            for t in text_split:
+                if 'td' in t:
+                    if 'href' not in t:
+                        t = t[4:-5]
+                        if '+-' in t:
+                            t = t.split('+-')[0].split(' ')[-1]
+                            planets[p_idx-1].append(t)
+                        elif 'lt' in t or 'gt' in t:
+                            t = t.split(';')[-1]
+                            planets[p_idx-1].append(t)
+                        else:
+                            t = t.split('span')
+                            if len(t) == 1:
+                                t = t[0].split(' ')[-1]
+                                if 'null' not in t:
+                                    if t.isdigit() or '.' in t:
+                                        planets[p_idx-1].append(t)
+                                    else:
+                                        if len(t) == 1:
+                                            planets.append([])
+                                            planets[p_idx].append(t)
+                                            p_idx += 1
+                                else:
+                                    planets[p_idx-1].append(t)
+                            else:
+                                t = t[1].split('>')[1].split('<')[0]
+                                planets[p_idx-1].append(t)
+    planets = planets[::2]
+
+    column_names_2 = []
+    planets_2 = []
+    p_idx = 0
+
+    for idx, title in enumerate(bs.findAll('div', {'class': 'data'})):
+        name = title.find('th').text
+        if name == 'Planet Parameters':
+            index = idx
+
+    found_highlight = False
+    for idx, text in enumerate(planet_props[index].findAll()):
+        text = unidecode(str(text))
+
+        if 'th' in text:
+            if 'tr' not in text:
+                if 'class' not in text:
+                    if 'span' not in text:
+                        if '(' in text:
+                            t = text[5:-6]
+                            if 'sup' in t:
+                                t = t.split('<')[0]
+                            column_names_2.append(t)
+                            
+        if idx > 1:
+            text_split = text.split('\n')
+            for t in text_split:
+                if 'td' in t:
+                    if 'href' not in t:
+                        t = t[4:-5]
+                        if '+-' in t:
+                            t = t.split('+-')[0].split(' ')[-1]
+                            planets_2[p_idx-1].append(t)
+                        elif 'lt' in t or 'gt' in t:
+                            t = t.split(';')[-1]
+                            planets_2[p_idx-1].append(t)
+                        else:
+                            t = t.split('span')
+                            if len(t) == 1:
+                                t = t[0].split(' ')[-1]
+                                if 'null' not in t:
+                                    if t.isdigit() or '.' in t:
+                                        planets_2[p_idx-1].append(t)
+                                    else:
+                                        if len(t) == 1:
+                                            planets_2.append([])
+                                            # planets_2[p_idx].append(t)
+                                            p_idx += 1
+                                else:
+                                    if len(t) == 1:
+                                        planets_2[p_idx-1].append(t)
+                                    elif 'null' in t:
+                                        planets_2[p_idx-1].append(t)
+                            else:
+                                t = t[1].split('>')[1].split('<')[0]
+                                planets_2[p_idx-1].append(t)
+
+    planets_2 = planets_2[::2]
+
+    for i in range(len(planets)):
+        planets[i].extend(planets_2[i])
+    
+    for i in column_names_2:
+        column_names.append(i)
+   
+    column_names = np.array(column_names)
+    for c, col in enumerate(column_names):
+        if col == 'Planet':
+            column_names[c] = 'Name'
+        if col == 'Period (days)':
+            column_names[c] = 'n'
+        if col == 'Semi-Major Axis (AU)':
+            column_names[c] = 'a'
+        if col == 'Inclination (deg)':
+            column_names[c] = 'i'
+        if col == 'Eccentricity':
+            column_names[c] = 'e'
+        if col == 'Longitude of Periastron (deg)':
+            column_names[c] = 'pi'
+        if col == 'Earth Mass':
+            column_names[c] = 'Mass'
+        if col == 'Jupiter Mass':
+            column_names[c] = 'Mj'
+
+    mass_idx = np.where(['Mass' in x for x in column_names])[0]
+    column_names[mass_idx[-1]] = 'Mass_2'
+
+    planets = np.array(planets)
+
+    labels, n_data = np.unique(planets[:, 0], return_counts=True)
+    start_idx = np.zeros_like(labels)
+    for s, l in enumerate(labels):
+        start_idx[s] = np.where(planets[:, 0] == l)[0][0]
+    start_idx = np.array(start_idx, dtype='int')
+
+    planet_means = []
+
+    for l in range(len(labels)):
+        planet_means.append([])
+        planet_means[l].append(labels[l])
+        for col in range(1, planets.shape[1]):
+            col_data = planets[:, col][start_idx[l]:start_idx[l]+n_data[l]]
+            planet_l_data = ma.masked_array(col_data, col_data == 'null').compressed()
+            try:
+                compressed_array = ma.array(planet_l_data, dtype=float)
+                if len(compressed_array) > 0:
+                    planet_means[l].append(ma.mean(compressed_array))
+                else:
+                    planet_means[l].append(np.nan)
+            except:
+                print('null')
+    
+    planet_means = np.array(planet_means)
+
+    columns_to_ignore = ['Passage', 'Date', 'Mj', 'Radii', 'g/cm', 'K']
+    idxs = []
+    for word in columns_to_ignore:
+        idx = np.where([word in x for x in column_names])[0]
+        for i in idx:
+            idxs.append(i)
+
+    df = pd.DataFrame(columns=column_names, index=range(0, len(planet_means)))
+    for row in range(len(planet_means)):
+        for col in range(len(column_names)):
+            df.ix[row, col] = planet_means[row, col]
+            if planet_means[row, col] == 'null':
+                df.ix[row, col] = np.nan
+            if col in idxs:
+                df.ix[row, col] = np.nan
+    
+    return df
+
+def read_data(obj_id):
+	''''''
+	Extracts the data from the highlighted row of each planet in the star system.
+	''''''
+    obj_id_split = obj_id.split(' ')
+    obj_id = obj_id_split[0]
+    output_id = obj_id_split[0]
+    for i in range(1, len(obj_id_split)):
+        obj_id += '+'+obj_id_split[i]
+        output_id += '_'+obj_id_split[i]
+
+    url = "https://exoplanetarchive.ipac.caltech.edu/cgi-bin/ExoOverview/nph-ExoOverview?objname={}&type=&label&aliases&exo&iden&orb&ppar&tran&note&disc&ospar&ts&nalc&force=&dhxr1507830887922".format(obj_id)
+    print('\nExtracting data of {} from:\n{}\n'.format(output_id, url))
+    response = requests.get(url)
+
+    bs = BeautifulSoup(response.content, "html.parser")
+
+    for idx, title in enumerate(bs.findAll('div', {'class': 'data'})):
+        name = title.find('th').text
+        if name == 'Planet Orbital Properties':
+            index = idx
+            # print(name, idx)
+
+    planet_props = bs.findAll('div', {'class': 'data'})
+
+    planets = []
+    column_names = []
+    p_idx = 0
+
+    found_highlight = False
+    for idx, text in enumerate(planet_props[index].findAll()):
+        text = unidecode(str(text))
+
+        found_highlight = 'class="overview_highlight"' in text
+        if 'th' in text:
+            if 'class' not in text:
+                if 'Reference' not in text:
+                    if 'href' not in text:
+                        column_names.append(text[4:-5])
+                        
+        if idx > 1:
+            if found_highlight:
+                text_split = text.split('\n')
+                for t in text_split:
+                    if 'tr' not in t:
+                        if 'href' not in t:
+                            t = t[4:-5]
+                            if '+-' in t:
+                                t = t.split('+-')[0].split(' ')[-1]
+                                planets[p_idx-1].append(t)
+                            elif 'lt' in t or 'gt' in t:
+                                t = t.split(';')[-1]
+                                planets[p_idx-1].append(t)
+                            else:
+                                t = t.split('span')
+                                if len(t) == 1:
+                                    t = t[0].split(' ')[-1]
+                                    if 'null' not in t:
+                                        if t.isdigit() or '.' in t:
+                                            planets[p_idx-1].append(t)
+                                        else:
+                                            planets.append([])
+                                            planets[p_idx].append(t)
+                                            p_idx += 1
+                                    else:
+                                        planets[p_idx-1].append(t)
+                                else:
+                                    t = t[1].split('>')[1].split('<')[0]
+                                    planets[p_idx-1].append(t)
+            found_highlight=False
+
+    p_idx = 0
+
+    for idx, title in enumerate(bs.findAll('div', {'class': 'data'})):
+        name = title.find('th').text
+        if name == 'Planet Parameters':
+            index = idx
+
+    found_highlight = False
+    for idx, text in enumerate(planet_props[index].findAll()):
+        text = unidecode(str(text))
+
+        found_highlight = 'class="overview_highlight"' in text
+        if 'th' in text:
+            if 'tr' not in text:
+                if 'class' not in text:
+                    if 'span' not in text:
+                        if '(' in text:
+                            t = text[5:-6]
+                            if 'sup' in t:
+                                t = t.split('<')[0]
+                            column_names.append(t)
+                            
+        if idx > 1:
+            if found_highlight:
+                text_split = text.split('\n')
+                for t in text_split:
+                    try:
+                        if 'tr' not in t:
+                            if 'href' not in t:
+                                t = t[4:-5]
+                                if '+-' in t:
+                                    t = t.split('+-')[0].split(' ')[-1]
+                                    planets[p_idx-1].append(t)
+                                elif 'lt' in t or 'gt' in t:
+                                    t = t.split(';')[-1]
+                                    planets[p_idx-1].append(t)
+                                else:
+                                    t = t.split('span')
+                                    if len(t) == 1:
+                                        t = t[0].split(' ')[-1]
+                                        if 'null' not in t:
+                                            if t.isdigit() or '.' in t:
+                                                planets[p_idx-1].append(t)
+                                            else:
+                                                p_idx += 1
+                                        else:
+                                            planets[p_idx-1].append(t)
+                                    else:
+                                        t = t[1].split('>')[1].split('<')[0]
+                                        # print(p_idx, end=', ')
+                                        planets[p_idx-1].append(t)
+                    except:
+                        print(t)
+            found_highlight=False
+
+    column_names = column_names[:]
+    column_names = np.array(column_names)
+    for c, col in enumerate(column_names):
+        if col == 'Planet':
+            column_names[c] = 'Name'
+        if col == 'Period (days)':
+            column_names[c] = 'n'
+        if col == 'Semi-Major Axis (AU)':
+            column_names[c] = 'a'
+        if col == 'Inclination (deg)':
+            column_names[c] = 'i'
+        if col == 'Eccentricity':
+            column_names[c] = 'e'
+        if col == 'Longitude of Periastron (deg)':
+            column_names[c] = 'pi'
+        if col == 'Earth Mass':
+            column_names[c] = 'Mass'
+        if col == 'Jupiter Mass':
+            column_names[c] = 'Mj'
+
+    mass_idx = np.where(['Mass' in x for x in column_names])[0]
+    column_names[mass_idx[-1]] = 'Mass_2'
+
+    planets = np.array(planets)
+
+    columns_to_ignore = ['Passage', 'Date', 'Mj', 'Radii', 'g/cm', 'K']
+    idxs = []
+    for word in columns_to_ignore:
+        idx = np.where([word in x for x in column_names])[0]
+        for i in idx:
+            idxs.append(i)
+
+    df = pd.DataFrame(columns=column_names, index=range(0, np.shape(planets)[0]))
+    for row in range(np.shape(planets)[0]):
+        for col in range(np.shape(planets)[1]):
+            df.ix[row, col] = planets[row, col]
+            if planets[row, col] == 'null':
+                df.ix[row, col] = np.nan
+            if col in idxs:
+                df.ix[row, col] = np.nan
+
+    for idx, title in enumerate(bs.findAll('div', {'class': 'data'})):
+        name = title.find('th').text
+        if name == 'Summary of Stellar Information':
+            index = idx
+
+    star_prop = []
+    found_highlight = False
+    for idx, text in enumerate(planet_props[index].findAll()):
+        text = unidecode(str(text))
+
+        found_highlight = 'Mass' in text
+        if idx > 1:
+            if found_highlight:
+                text_split = text.split('\n')
+                for t in text_split:
+                    if 'tr' not in t:
+                        if 'null' not in t:
+                            if 'class' not in t:
+                                t = t[4:-5].split('+-')
+                                star_prop.append(float(t[0]))
+                found_highlight = False
+                
+    df1 = pd.DataFrame(columns=['star_mass', 'star_radius'], index=range(0, 1))
+    df1.ix[0, 0] = star_prop[0]
+    if len(star_prop) == 1:
+        df1.ix[0, 1] = np.nan
+    else:
+        df1.ix[0, 1] = star_prop[1]
+
+    return df, df1
+
+def compare_data(df_highlighted, df_average, output_id):
+    rows, cols = df_highlighted.shape
+
+    mass_idx = df_highlighted.columns.get_loc("Mass")
+    n_idx = df_highlighted.columns.get_loc("n")
+    for row in range(rows):
+        for col in range(cols):
+            if pd.isnull(df_highlighted.ix[row, col]) and not pd.isnull(df_average.ix[row, col]):
+                df_highlighted.ix[row, col] = df_average.ix[row, col]
+
+            if col == mass_idx:
+                if str(df_highlighted.ix[row, col+2]) != 'nan':
+                    df_highlighted.ix[row, col] = df_highlighted.ix[row, col+2]
+            if col == n_idx:
+                df_highlighted.ix[row, col] = 2*np.pi/(float(df_highlighted.ix[row, col])/365)*180/np.pi
+    
+    cols_to_keep = ['Name', 'n', 'a', 'e', 'i', 'pi', 'Mass']
+    for pi in df_highlighted['pi']:
+        if pi == 'nan':
+            print('WARNING: nans exist for values of pi')
+            break
+    df_highlighted[cols_to_keep].to_csv('Exoplanets_data/'+output_id+'/'+'planets.csv', index=False)
+
+if __name__ == '__main__':
+    # obj_id = '55 Cnc'
+
+    if len(sys.argv) > 1:
+        obj_id = sys.argv[1]
+        args = sys.argv[2:]
+        for a in args:
+            obj_id += ' '+a
+        obj_id = list(obj_id)
+        for index, s in enumerate(obj_id):
+            if s == '+':
+                obj_id[index] = '%2B'
+        obj_id = "".join(obj_id)
+
+    df_highlight, df_star = read_data(obj_id)
+    df_mean = mean_data(obj_id)
+
+    obj_id_split = obj_id.split(' ')
+    output_id = obj_id_split[0]
+    for i in range(1, len(obj_id_split)):
+        output_id += '_'+obj_id_split[i]
+
+    folder = glob.glob('Exoplanets_data/'+output_id)
+    if len(folder) == 0:
+        os.system('mkdir '+'Exoplanets_data/'+output_id)
+
+    compare_data(df_highlight, df_mean, output_id)
+    df_star.to_csv('Exoplanets_data/'+output_id+'/'+'star.csv', index=False)
+
+\end{lstlisting}
+
+To use the code, either uncomment line 432 and replace the string with star id to extract data from, or in the terminal type: \texttt{python planet\_data\_crawler\_v2.py <star\_id>}.
+
+\subsubsection{Simulation results}
+
+
+\begin{longtable}{|l|c|c|c|c|c|c|c|}
+\caption{Eccentricity results of various star systems}
+\label{my-label} \\
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet  & $m \ (M_{\oplus})$ & $a \ (AU)$ & $e_{obs}$ & $\bar{e}$ & $\sigma_{e}$ & $e_{max}$ & $e_{min}$ \\ \hline
+\endfirsthead
+\multicolumn{8}{c}%
+{{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet  & $m \ (M_{\oplus})$ & $a$ & $e_{obs}$ & $\bar{e}$ & $\sigma_{e}$ & $e_{max}$ & $e_{min}$ \\ \hline\endhead
+\hline \multicolumn{8}{|r|}{{Continued on next page}} \\ \hline
+\endfoot
+
+\endlastfoot
+
+\hline
+24 Sex b      & 632.46  & 1.333 & 0.090   & 0.129   & 0.039  & 0.179  & 0.067  \\ 
+24 Sex c      & 273.32  & 2.080 & 0.290   & 0.254   & 0.036  & 0.301  & 0.200  \\ \hline
+61 Vir b      & 5.10    & 0.050 & 0.120   & 0.202   & 0.045  & 0.284  & 0.114  \\ 
+61 Vir c      & 18.20   & 0.218 & 0.140   & 0.232   & 0.072  & 0.335  & 0.113  \\ 
+61 Vir d      & 22.90   & 0.476 & 0.350   & 0.314   & 0.030  & 0.355  & 0.266  \\ \hline
+BD+20 2457 b  & 6807.63 & 1.450 & 0.150   & 0.140   & 0.058  & 0.211  & 0.039  \\ 
+BD+20 2457 c  & 3963.17 & 2.010 & 0.180   & 0.161   & 0.076  & 0.251  & 0.010  \\ \hline
+CoRoT-7 b     & 5.74    & 0.017 & 0.000   & 0.000   & 0.000  & 0.000  & 0.000  \\ 
+CoRoT-7 c     & 8.40    & 0.046 & 0.000   & 0.000   & 0.000  & 0.000  & 0.000  \\ \hline
+GJ 163 b      & 10.60   & 0.061 & 0.073   & 0.081   & 0.013  & 0.100  & 0.060  \\ 
+GJ 163 c      & 6.80    & 0.125 & 0.099   & 0.090   & 0.013  & 0.109  & 0.069  \\ 
+GJ 163 d      & 29.40   & 1.030 & 0.373   & 0.373   & 0.000  & 0.373  & 0.373  \\ \hline
+GJ 876 b      & 635.63  & 0.208 & 0.032   & 0.071   & 0.025  & 0.104  & 0.027  \\ 
+GJ 876 c      & 177.98  & 0.130 & 0.256   & 0.203   & 0.037  & 0.256  & 0.143  \\ 
+GJ 876 d      & 6.03    & 0.021 & 0.207   & 0.190   & 0.012  & 0.207  & 0.172  \\ 
+GJ 876 e      & 14.60   & 0.334 & 0.055   & 0.134   & 0.043  & 0.199  & 0.054  \\ \hline
+HAT-P-13 b    & 270.46  & 0.043 & 0.013   & 0.010   & 0.005  & 0.016  & 0.001  \\ 
+HAT-P-13 c    & 4538.42 & 1.223 & 0.662   & 0.662   & 0.000  & 0.662  & 0.662  \\ \hline
+HD 11964 b    & 198.00  & 3.160 & 0.041   & 0.041   & 0.001  & 0.041  & 0.040  \\ 
+HD 11964 c    & 25.00   & 0.229 & 0.300   & 0.300   & 0.000  & 0.300  & 0.300  \\ \hline
+HD 12661 b    & 691.57  & 0.808 & 0.377   & 0.309   & 0.052  & 0.377  & 0.230  \\ 
+HD 12661 c    & 575.88  & 2.815 & 0.031   & 0.156   & 0.071  & 0.241  & 0.028  \\ \hline
+HD 128311 b   & 562.20  & 1.084 & 0.303   & 0.212   & 0.103  & 0.334  & 0.004  \\ 
+HD 128311 c   & 993.20  & 1.740 & 0.159   & 0.198   & 0.045  & 0.257  & 0.129  \\ \hline
+HD 133131 A b & 451.00  & 1.440 & 0.330   & 0.332   & 0.097  & 0.457  & 0.174  \\ 
+HD 133131 A c & 133.00  & 4.490 & 0.490   & 0.448   & 0.139  & 0.626  & 0.218  \\ \hline
+HD 134987 b   & 505.00  & 0.810 & 0.233   & 0.229   & 0.002  & 0.233  & 0.226  \\ 
+HD 134987 c   & 260.00  & 5.800 & 0.120   & 0.125   & 0.003  & 0.129  & 0.120  \\ \hline
+HD 142 b      & 397.27  & 1.020 & 0.170   & 0.165   & 0.031  & 0.208  & 0.122  \\ 
+HD 142 c      & 1684.40 & 6.800 & 0.210   & 0.210   & 0.002  & 0.213  & 0.207  \\ \hline
+HD 160691 b   & 343.24  & 1.497 & 0.128   & 0.084   & 0.031  & 0.129  & 0.025  \\ 
+HD 160691 c   & 576.52  & 5.235 & 0.099   & 0.100   & 0.002  & 0.103  & 0.098  \\ 
+HD 160691 d   & 10.55   & 0.091 & 0.172   & 0.170   & 0.002  & 0.174  & 0.167  \\ 
+HD 160691 e   & 165.87  & 0.921 & 0.067   & 0.146   & 0.046  & 0.210  & 0.065  \\ \hline
+HD 190360 b   & 495.79  & 4.010 & 0.313   & 0.313   & 0.000  & 0.313  & 0.313  \\ 
+HD 190360 c   & 19.07   & 0.130 & 0.237   & 0.235   & 0.001  & 0.237  & 0.234  \\ \hline
+HD 202206 b   & 5530.00 & 0.830 & 0.435   & 0.416   & 0.026  & 0.452  & 0.379  \\ 
+HD 202206 c   & 776.00  & 2.550 & 0.267   & 0.340   & 0.139  & 0.509  & 0.095  \\ \hline
+HD 217107 b   & 441.77  & 0.075 & 0.127   & 0.127   & 0.000  & 0.127  & 0.127  \\ 
+HD 217107 c   & 826.32  & 5.320 & 0.517   & 0.517   & 0.000  & 0.517  & 0.517  \\ \hline
+HD 3167 b     & 5.02    & 0.018 & 0.000   & 0.024   & 0.010  & 0.041  & 0.000  \\ 
+HD 3167 c     & 9.80    & 0.180 & 0.267   & 0.316   & 0.033  & 0.362  & 0.267  \\ 
+HD 3167 d     & 6.90    & 0.078 & 0.360   & 0.232   & 0.106  & 0.360  & 0.033  \\ \hline
+HD 37124 b    & 215.00  & 0.534 & 0.054   & 0.145   & 0.070  & 0.245  & 0.023  \\ 
+HD 37124 c    & 207.00  & 1.710 & 0.125   & 0.113   & 0.050  & 0.192  & 0.002  \\ 
+HD 37124 d    & 221.00  & 2.807 & 0.160   & 0.120   & 0.041  & 0.191  & 0.026  \\ \hline
+HD 38529 b    & 266.65  & 0.131 & 0.257   & 0.254   & 0.004  & 0.262  & 0.249  \\ 
+HD 38529 c    & 4252.39 & 3.712 & 0.341   & 0.341   & 0.000  & 0.341  & 0.341  \\ \hline
+HD 73526 b    & 715.09  & 0.650 & 0.290   & 0.263   & 0.049  & 0.329  & 0.188  \\ 
+HD 73526 c    & 715.09  & 1.030 & 0.280   & 0.312   & 0.142  & 0.483  & 0.047  \\ \hline
+HD 74156 b    & 572.07  & 0.292 & 0.627   & 0.631   & 0.026  & 0.662  & 0.583  \\ 
+HD 74156 c    & 2561.60 & 3.850 & 0.432   & 0.432   & 0.002  & 0.436  & 0.429  \\ \hline
+HD 80606 b    & 1252.20 & 0.449 & 0.933   & 0.933   & 0.000  & 0.933  & 0.933  \\ \hline
+Kepler-30 b   & 11.30   & 0.180 & 0.042   & 0.034   & 0.006  & 0.043  & 0.025  \\ 
+Kepler-30 c   & 640.00  & 0.300 & 0.011   & 0.011   & 0.001  & 0.012  & 0.009  \\ 
+Kepler-30 d   & 23.10   & 0.500 & 0.022   & 0.027   & 0.006  & 0.034  & 0.018  \\ \hline
+ups And b     & 218.53  & 0.059 & 0.022   & 0.022   & 0.000  & 0.022  & 0.021  \\ 
+ups And c     & 629.60  & 0.828 & 0.260   & 0.269   & 0.008  & 0.280  & 0.258  \\ 
+ups And d     & 1313.22 & 2.513 & 0.299   & 0.206   & 0.081  & 0.306  & 0.067  \\ \hline
+\end{longtable}
+
+
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{exoplanet_eccs}
+\caption[]{}
+\label{}
+\end{center}
+\end{figure}
 
 \newpage
 
+\section{October 16$^{th} - $22$^{nd}$ 2017}
 
+ 
+\newpage
+
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{1em}{}
+\let\oldaddcontentsline\addcontentsline% Store \addcontentsline
+\renewcommand{\addcontentsline}[3]{}% Make \addcontentsline a no-op
 
 \bibliography{LogbookBib} 
 \bibliographystyle{ieeetr}
 
+\let\addcontentsline\oldaddcontentsline% Restore \addcontentsline
 \end{document}
