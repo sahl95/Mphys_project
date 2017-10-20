@@ -164,15 +164,16 @@ class solar_System():
             j_laplace_coeff_jk, j_laplace_coeff_jj = 2, 1
             front_factor = -1
             J2_correction = (((3/2)*J2*(R/a)**2)-((9/8)*(J2**2)*(R/a)**4)-((15/4)*J4*(R/a)**4))
+            if np.isnan(R): J2_correction = np.zeros(len(self.planets), dtype=complex)
             if do_ecc_damp: ecc_damp = (63/4)*(k/(1.5*Q))*(M/m)*(r/a)**5
             gr_correction = 3*(a)**2*(n)**2/(LIGHT_SPD**2*(1+m/M))*1/(1-e**2)
             # gr_correction[0] = 3*(a[0]/AU)**2*(n[0])**3/(LIGHT_SPD**2*(1+m[0]/M))*1/(1-e[0]**2)
-            # print((63/4)*(k/(1.5*Q))*(M/m)*(r/a)**5)
 
         if matrix_id == 'B':
             j_laplace_coeff_jk = j_laplace_coeff_jj = 1
             front_factor = 1
             J2_correction = (((3/2)*J2*(R/a)**2)-((27/8)*(J2**2)*(R/a)**4)-((15/4)*J4*(R/a)**4))
+            if np.isnan(R): J2_correction = np.zeros(len(self.planets), dtype=complex)
             gr_correction = np.zeros(n_planets)
             if do_ecc_damp: ecc_damp = np.zeros(n_planets)
             # n_merc = np.sqrt(G_CONST*M/a[0]**3)
@@ -536,9 +537,10 @@ class solar_System():
                 # else:
                 #     ax.plot(*xyz, '--', markersize=2, label=names[idx], zorder=-idx)
                 ax.plot(*xyz, '.', markersize=2, label=names[idx], zorder=-idx)
-                ax.set_zlim(-np.max([np.max(xyz[0]), np.max(xyz[1])]), np.max([np.max(xyz[0]), np.max(xyz[1])]))
-                ax.set_ylim(-np.max([np.max(xyz[0]), np.max(xyz[1])]), np.max([np.max(xyz[0]), np.max(xyz[1])]))
-                ax.set_xlim(-np.max([np.max(xyz[0]), np.max(xyz[1])]), np.max([np.max(xyz[0]), np.max(xyz[1])]))
+                max_axis = np.max([np.abs(np.min(xyz)), np.max(xyz)])
+                ax.set_zlim(-max_axis, max_axis)
+                ax.set_ylim(-max_axis, max_axis)
+                ax.set_xlim(-max_axis, max_axis)
                 ax.set_zlabel('z (AU)')
                 plt.xlabel('x (AU)')
                 plt.ylabel('y (AU)')
@@ -568,7 +570,7 @@ class solar_System():
 def plot_simulation_separate(t_data=None, y_data=None, xlabel="", ylabel="", data_labels=None):
     for idx in range(len(data_labels)):
         plt.figure()
-        plt.plot(t_data, y_data[idx], 'b-', label=data_labels[idx])
+        plt.loglog(t_data, y_data[idx], 'b-', label=data_labels[idx])
         plt.axvline(linestyle='--', color='r')
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -626,12 +628,12 @@ if __name__ == "__main__":
     star_system = solar_System('SolarSystemData/Sun.csv', 'SolarSystemData/solar_system.csv')
     # star_system = solar_System(1., 1., 'SolarSystemData/'+n+'.csv')
     # t = np.linspace(-10*10**6, 10*10**6, 10000)+0j
-    # t = np.linspace(-5*10**6, 5*10**6, 10000)+0j
+    t = np.linspace(-5*10**6, 5*10**6, 10000)+0j
     # t = np.linspace(-10., 0, 1006)+0j
     # t = np.linspace(-100000, 100000, 3508)+0j
-    t = np.linspace(-6, 3, 608)+0j
+    # t = np.linspace(-6, 3, 608)+0j
     eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=True, plot=False, separate=True)
     # print(star_system)
-    # plt.show()
+    plt.show()
 
 # WHY DOES VENUS AFFECT EARTHS ORBIT AT THE BEGINNING??????

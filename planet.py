@@ -40,14 +40,9 @@ class planet():
         self.units = {'a' : 'AU', 'mass' : 'M_EARTH', 'period' : 'days', 'i' : 'degrees', 'omega' : 'degrees',
                       'pi' : 'degrees', 'n' : 'degrees yr^(-1)', 'l' : 'degrees', 'r' : 'm', }
         
-        if np.isnan(self.i) or self.i == None:
-            self.i = 0
-
-        if np.isnan(self.pi) or self.pi == None:
-            self.pi = 0
-        
-        if self.Omega == None:
-            self.Omega = 0
+        if np.isnan(self.i) or self.i == None: self.i = 0
+        if np.isnan(self.pi) or self.pi == None: self.pi = 0
+        if self.Omega == None: self.Omega = 0
 
     def __str__(self):
         unit_keys = list(self.units.keys())
