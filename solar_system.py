@@ -106,7 +106,7 @@ class solar_System():
 
 
 
-    def frequency_matrix(self, matrix_id, J2=0, J4=0, do_ecc_damp=False):
+    def frequency_matrix(self, matrix_id, J2=0, J4=0):
         r"""
         Calculates the frequency matrix with the following correction terms included:
 
@@ -152,6 +152,7 @@ class solar_System():
         a = self.get_property_all_planets('a')
         e = self.get_property_all_planets('e')
 
+        do_ecc_damp = all(x is not None for x in self.get_property_all_planets('r'))
         if do_ecc_damp:
             k = self.get_property_all_planets('k')
             Q = self.get_property_all_planets('Q')
@@ -165,7 +166,7 @@ class solar_System():
             front_factor = -1
             J2_correction = (((3/2)*J2*(R/a)**2)-((9/8)*(J2**2)*(R/a)**4)-((15/4)*J4*(R/a)**4))
             if np.isnan(R): J2_correction = np.zeros(len(self.planets), dtype=complex)
-            if do_ecc_damp: ecc_damp = (63/4)*(k/(1.5*Q))*(M/m)*(r/a)**5
+            if do_ecc_damp: ecc_damp = (63/4)*(k/(1.5*Q))*(M/m)*(r/a)**5; print(ecc_damp)
             gr_correction = 3*(a)**2*(n)**2/(LIGHT_SPD**2*(1+m/M))*1/(1-e**2)
             # gr_correction[0] = 3*(a[0]/AU)**2*(n[0])**3/(LIGHT_SPD**2*(1+m[0]/M))*1/(1-e[0]**2)
 
@@ -452,21 +453,19 @@ class solar_System():
         time = np.real(time)
         
         O_list = self.get_pi_or_omega(p_arr, q_arr)
-        w_list = O_list-self.get_pi_or_omega(h_arr, k_arr)
+        w_list = self.get_pi_or_omega(h_arr, k_arr)-O_list
 
         n = self.get_property_all_planets('n')#/(SECS_IN_YEAR)*np.pi/180
         a = self.get_property_all_planets('a')
-        # l = self.get_property_all_planets('l')*np.pi/180
-        # pi = self.get_property_all_planets('pi')*np.pi/180
 
-        # # T = 2*np.pi*np.sqrt(((a[idx]*AU)**3)/(G_CONST*self.star_mass*M_SUN))/SECS_IN_YEAR
-        # # print(T)
-
-        # M0 = l[idx]-pi[idx]
         Mt = n[idx]*np.pi/180*(time-t0)
 
         EA = []
         e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
+        # print('e = {:.4f}, i = {:.4f}, w = {:.4f}, O = {:.4f}'.format(e[0], i[0]*180/np.pi, w[0]*180/np.pi, O[0]*180/np.pi))
+        # print('h = {:.4f}, k = {:.4f}, p = {:.4f}, q = {:.4f}'.format(np.real(h_arr[idx][0]), np.real(k_arr[idx][0]), np.real(p_arr[idx][0]), np.real(q_arr[idx][0])))
+        # print(e[0], i[0]*180/np.pi, np.arctan2(np.real(h_arr[idx][0]), np.real(k_arr[idx][0]))*180/np.pi,
+        #       np.arctan2(np.real(p_arr[idx][0]), np.real(q_arr[idx][0]))*180/np.pi)
         for t in range(len(time)):
             E = Mt[t]
             f_by_dfdE = (E-e[t]*np.sin(E)-Mt[t])/(1-e[t]*np.cos(E))
@@ -491,11 +490,59 @@ class solar_System():
               o_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O)-np.sin(w)*np.sin(O)))
         rz = (o_vec[0]*(np.sin(w)*np.sin(i))+o_vec[1]*(np.cos(w)*np.sin(i)))
 
-        return [rx, ry, rz]
+        return np.array([rx, ry, rz])
+
+    def initial_pos_vel(self, idx, time, t0=0):
+        n = self.get_property_all_planets('n')
+        a = self.get_property_all_planets('a')
+        ecc = self.get_property_all_planets('e')
+        inc = self.get_property_all_planets('i')*np.pi/180
+        O_list = self.get_property_all_planets('Omega')*np.pi/180
+        w_list = self.get_property_all_planets('pi')*np.pi/180-O_list
+
+
+        M = n[idx]*np.pi/180*(time-t0)
+
+        e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
+        # print('e = {:.4f}, i = {:.4f}, w = {:.4f}, O = {:.4f}'.format(e, i*180/np.pi, w*180/np.pi, O*180/np.pi))
+        # print(e, i, w, O)
+        E = M
+        f_by_dfdE = (E-e*np.sin(E)-M)/(1-e*np.cos(E))
+        j, maxIter, delta = 0, 30, 0.0000000001
+        while (j < maxIter)*(np.abs(f_by_dfdE) > delta):
+            E = E-f_by_dfdE
+            f_by_dfdE = (E-e*np.sin(E)-M)/(1-e*np.cos(E))
+            j += 1
+        EA = E
+        # print(EA)
+        nu = 2*np.arctan2(np.sqrt(1+e)*np.sin(EA/2), np.sqrt(1-e)*np.cos(EA/2))
+
+        rc = a[idx]*(1-e*np.cos(EA))
+        # print('a: {}, {}\nr_max: {}, {}\nr_min {}, {}\n'.format(a[idx], np.mean(rc), a[idx]*(1+np.max(e)), np.max(rc), a[idx]*(1-np.min(e)), np.min(rc)))
+
+        o_vec = np.array([rc*np.cos(nu), rc*np.sin(nu), 0])
+
+        mu = G_CONST*self.star_mass*M_SUN
+        o_dot_vec = (np.sqrt(mu*a[idx]*AU)/(rc*AU))*np.array([-np.sin(EA), np.sqrt(1-e**2)*np.cos(EA), 0])
+        # print(o_dot_vec)
+        # print('mu = {}'.format(G_CONST*self.star_mass*M_SUN))
+
+        rx = (o_vec[0]*(np.cos(w)*np.cos(O)-np.sin(w)*np.cos(i)*np.sin(O))-
+              o_vec[1]*(np.sin(w)*np.cos(O)+np.cos(w)*np.cos(i)*np.sin(O)))
+        ry = (o_vec[0]*(np.cos(w)*np.sin(O)+np.sin(w)*np.cos(i)*np.cos(O))+
+              o_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O)-np.sin(w)*np.sin(O)))
+        rz = (o_vec[0]*(np.sin(w)*np.sin(i))+o_vec[1]*(np.cos(w)*np.sin(i)))
+
+        vx = (o_dot_vec[0]*(np.cos(w)*np.cos(O)-np.sin(w)*np.cos(i)*np.sin(O))-
+              o_dot_vec[1]*(np.sin(w)*np.cos(O)+np.cos(w)*np.cos(i)*np.sin(O)))
+        vy = (o_dot_vec[0]*(np.cos(w)*np.sin(O)+np.sin(w)*np.cos(i)*np.cos(O))+
+              o_dot_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O)-np.sin(w)*np.sin(O)))
+        vz = (o_dot_vec[0]*(np.sin(w)*np.sin(i))+o_dot_vec[1]*(np.cos(w)*np.sin(i)))
+
+        return np.array([rx, ry, rz]), np.array([vx, vy, vz])*(86400/AU)
 
     def simulate(self, t, plot_orbit=False, plot=False, separate=True):
-        A, B = [self.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12),
-                                      do_ecc_damp=True) for mat_id in ['A', 'B']]
+        A, B = [self.frequency_matrix(matrix_id=mat_id, J2=-6.84*10**(-7), J4=2.8*10**(-12)) for mat_id in ['A', 'B']]
         g, x, f, y = *np.linalg.eig(A), *np.linalg.eig(B)
         S, beta, T, gamma = self.find_all_scaling_factor_and_phase(x, y)
         # print(g*100*180/np.pi*3600, '\n')
@@ -557,9 +604,9 @@ class solar_System():
         # plot_eccentricity(t, eccentricities[idx], names[idx])
         # print(np.max(eccentricities[idx]), np.min(eccentricities[idx]), np.mean(eccentricities[idx]), '\n')
 
-        for idx in range(len(precession_rates)):
-            print('Precession rate of {} = {:.4f} arcseconds per century'.format(names[idx],
-                  np.mean(precession_rates[idx])*180/np.pi*3600*100))
+        # for idx in range(len(precession_rates)):
+        #     print('Precession rate of {} = {:.4f} arcseconds per century'.format(names[idx],
+        #           np.mean(precession_rates[idx])*180/np.pi*3600*100))
             # print('Eccentricity of {} = {:.4f}'.format(names[idx],
             #       np.mean(eccentricities[idx])))
             # print('Inclination of {} = {:.2f} degrees'.format(names[idx],
@@ -570,7 +617,7 @@ class solar_System():
 def plot_simulation_separate(t_data=None, y_data=None, xlabel="", ylabel="", data_labels=None):
     for idx in range(len(data_labels)):
         plt.figure()
-        plt.loglog(t_data, y_data[idx], 'b-', label=data_labels[idx])
+        plt.plot(t_data, y_data[idx], 'b-', label=data_labels[idx])
         plt.axvline(linestyle='--', color='r')
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
@@ -628,12 +675,12 @@ if __name__ == "__main__":
     star_system = solar_System('SolarSystemData/Sun.csv', 'SolarSystemData/solar_system.csv')
     # star_system = solar_System(1., 1., 'SolarSystemData/'+n+'.csv')
     # t = np.linspace(-10*10**6, 10*10**6, 10000)+0j
-    t = np.linspace(-5*10**6, 5*10**6, 10000)+0j
+    # t = np.linspace(0, 5*10**6, 10000)+0j
     # t = np.linspace(-10., 0, 1006)+0j
     # t = np.linspace(-100000, 100000, 3508)+0j
-    # t = np.linspace(-6, 3, 608)+0j
+    t = np.linspace(-2, 3, 608)+0j
     eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=True, plot=False, separate=True)
     # print(star_system)
-    plt.show()
+    # plt.show()
 
 # WHY DOES VENUS AFFECT EARTHS ORBIT AT THE BEGINNING??????
