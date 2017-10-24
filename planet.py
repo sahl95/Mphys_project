@@ -23,7 +23,7 @@ class planet():
         Q (float): The tidal quality factor of the planet.
     """
     def __init__(self, Name="", Period=None, e=None, a=None, i=None, Omega=None, pi=None, l=None,
-                 Mass=None, n=None, k=None, Q=None, r=None):
+                 Mass=None, n=None, k=None, Q=None, r=None, spin=None):
         self.Name = Name
         self.period = Period
         self.e = e
@@ -34,15 +34,17 @@ class planet():
         self.l = l 
         self.Mass = Mass
         self.r = r
-        self.n = n
+        self.n = None
         self.k = k
         self.Q = Q
+        self.spin = spin
         self.units = {'a' : 'AU', 'mass' : 'M_EARTH', 'period' : 'days', 'i' : 'degrees', 'omega' : 'degrees',
                       'pi' : 'degrees', 'n' : 'degrees yr^(-1)', 'l' : 'degrees', 'r' : 'm', }
         
-        if np.isnan(self.i) or self.i == None: self.i = 0
+        if np.isnan(self.i) or self.i == None or self.i == 0: self.i = 0.0001*np.random.random()
         if np.isnan(self.pi) or self.pi == None: self.pi = 0
         if self.Omega == None: self.Omega = 0
+        if self.e == 0: self.e += 0.00001
 
     def __str__(self):
         unit_keys = list(self.units.keys())

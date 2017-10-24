@@ -3,12 +3,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from solar_system import solar_System, plot_simulation_separate
 
+M_SUN = 1.9885*10**30
+M_EARTH = 5.9726*10**24
+
 def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=False, folder_name=None):
-    A, B = [star_sys.frequency_matrix(matrix_id=mat_id, J2=0, J4=0, do_ecc_damp=False) for mat_id in ['A', 'B']]
+    star_sys.set_n()
+
+    A, B = [star_sys.frequency_matrix(matrix_id=mat_id, J2=0, J4=0) for mat_id in ['A', 'B']]
     g, x, f, y = *np.linalg.eig(A), *np.linalg.eig(B)
     S, beta, T, gamma = star_sys.find_all_scaling_factor_and_phase(x, y)
     # print(g*100*180/np.pi*3600, '\n')
-
+    # print(A, B)
     kwargs = {'scaled_eigenvector' : S*x, 'eigenvalue' : g, 'phase' : beta,
                 't' : t}
     h_list = star_sys.components_of_ecc_inc(**kwargs, eq_id='h')
@@ -22,10 +27,11 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
     inclinations = star_sys.get_inclination(p_list, q_list)
 
     names = star_sys.get_property_all_planets('Name')
-    # a = star_sys.get_property_all_planets('a')
+    a = np.reshape(star_sys.get_property_all_planets('a'), (len(star_sys.planets), 1))
+
     t = np.real(t)
     if plot:
-        plot_simulation_separate(t/10**6, 5*(1-eccentricities), 'Time (Myr)', 'Eccentricity', names)
+        plot_simulation_separate(t/10**6, eccentricities, 'Time (Myr)', 'Eccentricity', names)
         # plot_simulation_separate(t/10**6, inclinations*180/np.pi, 'Time (Myr)', 'Inclination', names)
 
     if plot_orbit:
@@ -35,10 +41,20 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
         ax.plot(x, y, z, 'b*', markersize=3, zorder=-999)
         # ax = fig.add_subplot(111)
         # ax.plot(0, 0, 'b*', markersize=3)
+        
+        # star_sys.initial_pos_vel(1, t[0])
         for idx in range(len(star_sys.planets)):
+            print(names[idx])
+            xyz_init, uvw_init = star_sys.initial_pos_vel(idx, t[0])
+            # print(uvw_init)
             xyz = star_sys.kep2cart(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
+            print('{:.8f} {:.8f} {:.8f}'.format(*xyz_init))#, np.sqrt(xyz_init[0]**2+xyz_init[1]**2+xyz_init[2]**2)))
+            print('{:.8g} {:.8g} {:.8g}'.format(*uvw_init))#, np.sqrt(uvw_init[0]**2+uvw_init[1]**2+uvw_init[2]**2)))
+            # print('x = {:.4f}, y = {:.4f}, z = {:.4f} | r = {:.4f}'.format(*xyz[:, 0], np.sqrt(xyz[0, 0]**2+xyz[1, 0]**2+xyz[2, 0]**2)))
+            print()
 
             ax.plot(*xyz, '.', markersize=2, label=names[idx], zorder=-idx)
+            # print(xyz[:, 0])
             max_axis = np.max([np.abs(np.min(xyz)), np.max(xyz)])
             ax.set_zlim(-max_axis, max_axis)
             ax.set_ylim(-max_axis, max_axis)
@@ -52,23 +68,33 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
                 df = pd.DataFrame({"time": t ,"x" : xyz[0], "y" : xyz[1], "z" : xyz[2]})
                 df.to_csv(folder_name+'/'+names[idx]+'_xyz.csv', index=False)
 
+    precession_rates, xlabel = star_sys.get_perihelion_precession_rates(A, eccentricities, h_list, k_list), 'Pericenter'
+
+    # for idx in range(len(star_sys.planets)):
+    #     # print('Eccentricity of {} = {:.4f}'.format(names[idx],
+    #         #   np.mean(eccentricities[idx])))
+    #     print('Precession rate of {} = {} arcseconds per century'.format(names[idx],
+    #             np.mean(precession_rates[idx])*180/np.pi*3600*100))
+        
+    return eccentricities
+
 if __name__ == "__main__":
 
-    folder = 'KR_paper_tests/'
-    # folder = 'Exoplanets_data/'
-    star_id ='1st_test'
+    # folder = 'SolarSystemData/'
+    # folder = 'KR_paper_tests/'
+    folder = 'Exoplanets_data/'
+    star_id = 'HD_37124'
+    # star_id = ''
     folder_name = folder+star_id
     star_sys = solar_System(folder_name+'/star.csv', folder_name+'/planets.csv')
+    # star_sys = solar_System(folder_name+'/Sun.csv', folder_name+'/solar_system.csv')
 
     # print(star_sys)
-    # t = np.linspace(-5*10**(4), 5*10**(4), 5000)+0j
-    # t = np.linspace(-0, .1, 500)+0j
-    t = np.linspace(10**6, 2.5*10**10, 10000)+0j
-    simulate(star_sys, t, plot=True, plot_orbit=True, save=False, folder_name=folder_name)
+    times = np.linspace(0, 5*10**(4), 12345)+0j
+    # times = np.linspace(-0, .1, 500)+0j
+    # times = np.linspace(10**6, 10**10, 10000)+0j
+    # times = np.logspace(6, 10, 10000)+0j
+    eccs = simulate(star_sys, times, plot=True, plot_orbit=False, save=False, folder_name=folder_name)
 
-
-    # df = pd.read_csv(folder_name+'/c_nbody.csv')
-    # plt.figure()
-    # plt.plot(df['Time'], df['e'])
-    plt.show()
-    # print(star_sys)
+    plt.show() 
+    # print(star_sys.get_property_all_planets('Mass')*M_EARTH/M_SUN)
