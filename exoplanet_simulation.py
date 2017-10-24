@@ -5,6 +5,8 @@ from solar_system import solar_System, plot_simulation_separate
 
 M_SUN = 1.9885*10**30
 M_EARTH = 5.9726*10**24
+AU = 149597870700
+R_SUN = 6.9551*10**8
 
 def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=False, folder_name=None):
     star_sys.set_n()
@@ -42,16 +44,23 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
         # ax = fig.add_subplot(111)
         # ax.plot(0, 0, 'b*', markersize=3)
         
-        # star_sys.initial_pos_vel(1, t[0])
+        print("PLANET DATA FOR big.in")
+        print("----------------------")
         for idx in range(len(star_sys.planets)):
-            print(names[idx])
+            star_id = folder_name.split('/')[-1]
+            prefix = ''
+            for s in star_id.split('_'):
+                prefix += s
+            
+            print('{}{}  m=  {} '.format(prefix, names[idx], star_sys.planets[idx].Mass*M_EARTH/M_SUN), end='')
+            print(' r=   2.0000000000000000      d=   3.0000000000000000')
             xyz_init, uvw_init = star_sys.initial_pos_vel(idx, t[0])
             # print(uvw_init)
             xyz = star_sys.kep2cart(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
-            print('{:.8f} {:.8f} {:.8f}'.format(*xyz_init))#, np.sqrt(xyz_init[0]**2+xyz_init[1]**2+xyz_init[2]**2)))
-            print('{:.8g} {:.8g} {:.8g}'.format(*uvw_init))#, np.sqrt(uvw_init[0]**2+uvw_init[1]**2+uvw_init[2]**2)))
+            print(' {} {} {}'.format(*xyz_init))#, np.sqrt(xyz_init[0]**2+xyz_init[1]**2+xyz_init[2]**2)))
+            print(' {} {} {}'.format(*uvw_init))#, np.sqrt(uvw_init[0]**2+uvw_init[1]**2+uvw_init[2]**2)))
             # print('x = {:.4f}, y = {:.4f}, z = {:.4f} | r = {:.4f}'.format(*xyz[:, 0], np.sqrt(xyz[0, 0]**2+xyz[1, 0]**2+xyz[2, 0]**2)))
-            print()
+            print(' 0.0000000000000000        0.0000000000000000        0.0000000000000000')
 
             ax.plot(*xyz, '.', markersize=2, label=names[idx], zorder=-idx)
             # print(xyz[:, 0])
@@ -83,7 +92,7 @@ if __name__ == "__main__":
     # folder = 'SolarSystemData/'
     # folder = 'KR_paper_tests/'
     folder = 'Exoplanets_data/'
-    star_id = 'HD_37124'
+    star_id = 'HD_12661'
     # star_id = ''
     folder_name = folder+star_id
     star_sys = solar_System(folder_name+'/star.csv', folder_name+'/planets.csv')
@@ -94,7 +103,12 @@ if __name__ == "__main__":
     # times = np.linspace(-0, .1, 500)+0j
     # times = np.linspace(10**6, 10**10, 10000)+0j
     # times = np.logspace(6, 10, 10000)+0j
-    eccs = simulate(star_sys, times, plot=True, plot_orbit=False, save=False, folder_name=folder_name)
+    eccs = simulate(star_sys, times, plot=True, plot_orbit=True, save=False, folder_name=folder_name)
 
-    plt.show() 
+    print("\nSTELLAR DATA FOR param.in")
+    print("-------------------------") 
+    print(star_sys.star_mass)
+    print(star_sys.star_radius*R_SUN/AU)
+
+    # plt.show() 
     # print(star_sys.get_property_all_planets('Mass')*M_EARTH/M_SUN)
