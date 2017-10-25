@@ -11,7 +11,7 @@
 \usepackage[table,xcdraw]{xcolor}      	% Use for normal tables
 \usepackage{longtable} % Use for long tables
 \usepackage{multirow}
-\usepackage{caption}
+\usepackage[font=scriptsize]{caption}
 \usepackage{subcaption}
 \captionsetup{belowskip=10pt,aboveskip=4pt}
 
@@ -997,7 +997,7 @@ The plots for the eccentricity and inclination of each planet are as shown:
 
 By comparing these plots with existing results \cite{ssd, texas}, it can be seen that the results are consistent with what is expected. It should be noted that the eccentricity plots do not match with Murray \& Dermott as well as the inclinations. However when comparing the max and min eccentricity (especially Mercury) to the other data\cite{texas}, the eccentricities do match well. Oddly, the inclinations in the other data\cite{texas} do not match as well; has lower $I_{min}$ and higher $I_{max}$.
 
-\subsubsection{Precession of mercury}
+\subsubsection{Precession of Mercury}
 
 Another test that serves as a good indicator of the accuracy of the simulation is determining the precession of Mercury. Applying Laplace-Lagrange secular theory is expected to yield a precession rate, $\dot{\varpi}$ of $544{}'' yr^{-1}$\cite{texas, PRMer}.
 
@@ -1036,6 +1036,7 @@ The effect of the oblateness of the Sun on the precession rate of Mercury was al
 \section{October 1$^{st} - $8$^{th}$ 2017}
 
 \subsection{Keplerian to Cartesian coordinates}
+\label{kep2cart}
 
 The next test to check accuracy is to convert the output of the equations of motion to cartesian coordinates in order to plot the Solar System for visual inspection. For this we use:
 \begin{itemize}
@@ -1230,6 +1231,7 @@ def real_scaling_factor_and_phase(x1, *boundaries):
 As before with GR, the effect of eccentricity damping is tested on the precession rate of the planets. It was found that this additional had no effect, at least on timescales of a few million years. However, for the Solar System, only a small change is expected, on timescales of billions of years.
 
 \subsection{Animating the Solar System}
+\label{animation}
 
 To be able to perform quick visual tests of the simulation (a few years at a time), code was written to create an animation of the solar system.
 
@@ -1312,7 +1314,7 @@ ani = matplotlib.animation.FuncAnimation(fig, update_graph, len(x),
 ani.save('Animate_solar_system/Plots/rocky_planets.mp4', fps=24)
 \end{lstlisting}
 
-After viewing the animation it was found that all the planets behaved normally with 1 exception; Earth. The behaves normally at all times $t < 0$ years. However during $0 \leq t \leq 1$ years, the Earth behaves in an unexpected manner, at $t > 1$ years, the behaviour of the Earth returns to normal.  This behaviour is also only seen if both Venus and Jupiter are present in the simulation.
+After viewing the animation it was found that all the planets behaved normally with 1 exception; Earth. The behaves normally at all times $t < 0$ years. However during $0 \leq t \leq 1$ years, the Earth behaves in an unexpected manner. During this time, the Earth slows down and then reverses at any extremely quickly before stopping again, at which point it goes back to its normal speed. At $t > 1$ years, the behaviour of the Earth returns to normal. This behaviour is also only seen if both Venus and Jupiter are present in the simulation.
 
 The cause of this bug is unknown for now. However it does not have any effect on long term simulations (as seen by results in \S\ref{GRcor}) due to the very short duration of the bug. Hence, the simulation can now be tested on other star systems.
 
@@ -1554,7 +1556,6 @@ def read_data(obj_id):
         name = title.find('th').text
         if name == 'Planet Orbital Properties':
             index = idx
-            # print(name, idx)
 
     planet_props = bs.findAll('div', {'class': 'data'})
 
@@ -1653,7 +1654,6 @@ def read_data(obj_id):
                                             planets[p_idx-1].append(t)
                                     else:
                                         t = t[1].split('>')[1].split('<')[0]
-                                        # print(p_idx, end=', ')
                                         planets[p_idx-1].append(t)
                     except:
                         print(t)
@@ -1785,7 +1785,7 @@ if __name__ == '__main__':
 
 \end{lstlisting}
 
-To use the code, either uncomment line 432 and replace the string with star id to extract data from, or in the terminal type: \texttt{python planet\_data\_crawler\_v2.py <star\_id>}.
+To use the code uncomment line 430 and replace the string with the star id to extract data from, or in the terminal type: \texttt{python planet\_data\_crawler\_v2.py <star\_id>}.
 
 \subsubsection{Simulation results}
 
@@ -1801,7 +1801,7 @@ Planet  & $m \ (M_{\oplus})$ & $a \ (AU)$ & $e_{obs}$ & $\bar{e}$ & $\sigma_{e}$
 {{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
 \hline
 \rowcolor[HTML]{C0C0C0} 
-Planet  & $m \ (M_{\oplus})$ & $a$ & $e_{obs}$ & $\bar{e}$ & $\sigma_{e}$ & $e_{max}$ & $e_{min}$ \\ \hline\endhead
+Planet  & $m \ (M_{\oplus})$ & $a  \ (AU)$ & $e_{obs}$ & $\bar{e}$ & $\sigma_{e}$ & $e_{max}$ & $e_{min}$ \\ \hline\endhead
 \hline \multicolumn{8}{|r|}{{Continued on next page}} \\ \hline
 \endfoot
 
@@ -1883,6 +1883,420 @@ ups And d     & 1313.22 & 2.513 & 0.299   & 0.206   & 0.081  & 0.306  & 0.067  \
 
 \section{October 16$^{th} - $22$^{nd}$ 2017}
 
+\subsection{Simulating tests in Rice 2015}
+
+\subsection{Wacky earth bug fix}
+
+
+\newpage
+
+\section{October 23$^{rd} - $29$^{th}$ 2017}
+
+\subsection{Comparison with n-body simulations}
+
+Due to the failure to replicate the output of the 1st test from KR, the output from the secular theory described here was compared to output from n-body simulations in order to determine how well the code for secular theory matched with n-body simulations.
+
+To use the n-body simulations, a new function, similar to the one in \S\ref{kep2cart} was written to calculate the  the initial position and velocity. This was done by extending the equations in \S\ref{kep2cart} to also find the velocities. 
+
+\begin{equation}
+\mathbf{\dot{o}}(t) = \begin{pmatrix}
+\dot{o}_{x}(t)\\ 
+\dot{o}_{y}(t)\\ 
+\dot{o}_{z}(t)
+\end{pmatrix} = \frac{\sqrt{\mu a}}{r_{c}(t)} \begin{pmatrix}
+-\sin E\\ 
+\sqrt{1-e^{2}} \cos E\\ 
+0
+\end{pmatrix}
+\end{equation}
+
+where $\mu = GM$. $G$ is the gravitational constant and $M$ is the mass of the central body. The velocity is then given by:
+\begin{equation}
+\mathbf{v}(t) = \begin{pmatrix}
+\dot{o}_{x}(t)(\cos(\omega)\cos(\Omega)-\sin(\omega)\cos(i)\sin(\Omega))-\dot{o}_{y}(t)(\sin(\omega)\cos(\Omega)+\cos(\omega)\cos(i)\sin(\Omega))\\ 
+\dot{o}_{x}(t)(\cos(\omega)\sin(\Omega)+\sin(\omega)\cos(i)\cos(\Omega))+\dot{o}_{y}(t)(\cos(\omega)\cos(i)\cos(\Omega)-\sin(\omega)\sin(\Omega))\\ 
+\dot{o}_{x}(t)(\sin(\omega)\sin(i))+\dot{o}_{y}(t)(\cos(\omega)\sin(i))
+\end{pmatrix}
+\end{equation}
+
+\begin{lstlisting}[language=Python, caption={Calculating initial conditions for n-body simulation}]
+	def initial_pos_vel(self, idx):
+        n = self.get_property_all_planets('n')
+        a = self.get_property_all_planets('a')
+        ecc = self.get_property_all_planets('e')
+        inc = self.get_property_all_planets('i')*np.pi/180
+        O_list = self.get_property_all_planets('Omega')*np.pi/180
+        w_list = self.get_property_all_planets('pi')*np.pi/180-O_list
+
+        M = 0
+        e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
+
+        E = M
+        f_by_dfdE = (E-e*np.sin(E)-M)/(1-e*np.cos(E))
+        j, maxIter, delta = 0, 30, 0.0000000001
+        while (j < maxIter)*(np.abs(f_by_dfdE) > delta):
+            E = E-f_by_dfdE
+            f_by_dfdE = (E-e*np.sin(E)-M)/(1-e*np.cos(E))
+            j += 1
+        EA = E
+        nu = 2*np.arctan2(np.sqrt(1+e)*np.sin(EA/2), np.sqrt(1-e)*np.cos(EA/2))
+
+        rc = a[idx]*(1-e*np.cos(EA))
+        o_vec = np.array([rc*np.cos(nu), rc*np.sin(nu), 0])
+
+        rx = (o_vec[0]*(np.cos(w)*np.cos(O) - np.sin(w)*np.cos(i)*np.sin(O)) - o_vec[1]*(np.sin(w)*np.cos(O) + np.cos(w)*np.cos(i)*np.sin(O)))
+        ry = (o_vec[0]*(np.cos(w)*np.sin(O) + np.sin(w)*np.cos(i)*np.cos(O)) + o_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O) - np.sin(w)*np.sin(O)))
+        rz = (o_vec[0]*(np.sin(w)*np.sin(i)) + o_vec[1]*(np.cos(w)*np.sin(i)))
+
+        mu = G_CONST*self.star_mass*M_SUN
+        o_dot_vec = (np.sqrt(mu*a[idx]*AU)/(rc*AU))*np.array([-np.sin(EA), np.sqrt(1-e**2)*np.cos(EA), 0])
+        
+        vx = (o_dot_vec[0]*(np.cos(w)*np.cos(O) - np.sin(w)*np.cos(i)*np.sin(O)) - o_dot_vec[1]*(np.sin(w)*np.cos(O) + np.cos(w)*np.cos(i)*np.sin(O)))
+        vy = (o_dot_vec[0]*(np.cos(w)*np.sin(O) + np.sin(w)*np.cos(i)*np.cos(O)) + o_dot_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O) - np.sin(w)*np.sin(O)))
+        vz = (o_dot_vec[0]*(np.sin(w)*np.sin(i)) + o_dot_vec[1]*(np.cos(w)*np.sin(i)))
+
+        return np.array([rx, ry, rz]), np.array([vx, vy, vz])*(86400/AU)
+\end{lstlisting}
+
+For all the star systems below, the value of the ascending node, $\Omega$ of every planet was set to 0, unless specified. For some star systems, the inclinations, $i$ of the planets are not known. In these cases, the inclination is set to 0.
+
+\subsubsection{HD 37124}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+HD 37124 b    & 0.53364 & 0.054 & 0.0 & 130.0 & 215  \\ \hline
+HD 37124 c    & 1.7100  & 0.125 & 0.0 & 53.0 & 207  \\ \hline
+HD 37124 d    & 2.807   & 0.16  & 0.0 & 0.0 & 221 \\ \hline
+\end{tabular}
+\caption{Planet data for HD 37124}
+\end{table}
+
+Using the above data for HD 37124, the eccentricity evolution was calculated for each planet and was compared to the output from n-body simulations.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{HD37124}
+\caption[]{Comparison of secular theory (blue) for HD 37124 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+Although the eccentricity evolution from the n-body calculation oscillate much more frequently than from secular theory for HD 37124 b and d, it can be seen that the results are in good qualitative agreement with each other.
+
+\newpage
+
+\subsubsection{HD 3167}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+HD 3167 b    & 0.01815 & 0     & 0.0 & 0.0 & 5.02 \\ \hline
+HD 3167 c    & 0.1795  & 0.267 & 0.0 & 0.0 & 9.8  \\ \hline
+HD 3167 d    & 0.07757 & 0.36  & 0.0 & 0.0 & 6.9  \\ \hline
+\end{tabular}
+\caption{Planet data for HD 3167}
+\end{table}
+
+Using the above data for HD 3167, the eccentricity evolution was calculated for each planet and was compared to the output from n-body simulations.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{HD3167}
+\caption[]{Comparison of secular theory (blue) for HD 3167 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+\subsubsection{HD 12661}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+HD 12661 b    & 0.8079 & 0.3768 & 0.0 & 305.1 & 691.569 \\ \hline
+HD 12661 c    & 2.8145 & 0.031  & 0.0 & 101.5 & 575.884 \\ \hline
+\end{tabular}
+\caption{Planet data for HD 12661}
+\end{table}
+
+
+
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{HD12661}
+\caption[]{Comparison of secular theory (blue) for HD 12661 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+\subsubsection{61 Vir}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+61 Vir b    & 0.050201 & 0.12 & 0.0 & 105 & 5.1  \\ \hline
+61 Vir c    & 0.2175   & 0.14 & 0.0 & 341 & 18.2 \\ \hline
+61 Vir d    & 0.476    & 0.35 & 0.0 & 314 & 22.9 \\ \hline
+\end{tabular}
+\caption{Planet data for 61 Vir}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{61Vir}
+\caption[]{Comparison of secular theory (blue) for 61 Vir with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+\subsubsection{24 Sex}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+24 Sex b    & 1.333 & 0.09 & 0.0 & 9.2   & 632.46 \\ \hline
+24 Sex c    & 2.08  & 0.29 & 0.0 & 220.5 & 273.32 \\ \hline
+\end{tabular}
+\caption{Planet data for 24 Sex}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{24Sex}
+\caption[]{Comparison of secular theory (blue) for 24 Sex with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+
+\subsubsection{CoRoT-7}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+CoRoT-7 b    & 0.017016 & 0.0 & 80.78 & 170.0 & 5.74 \\ \hline
+CoRoT-7 c    & 0.046    & 0.0 & 80    & 180   & 8.4  \\ \hline
+\end{tabular}
+\caption{Planet data for CoRoT-7}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{CoRoT-7}
+\caption[]{Comparison of secular theory (blue) for CoRoT-7with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+Frequency of oscillation for b is similar, but amplitude of oscillations is much higher for nbody.
+
+\newpage
+
+\subsubsection{HD 142}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+HD 142 b    & 1.02 & 0.17 & 0.0 & 327.0 & 397.27 \\ \hline
+HD 142 c    & 6.8  & 0.21 & 0.0 & 250.0 & 1684.4 \\ \hline
+\end{tabular}
+\caption{Planet data for HD 142}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{HD142}
+\caption[]{Comparison of secular theory (blue) for HD 142 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+\subsubsection{HD 168443}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+HD 168443 b    & 0.2931 & 0.52883 & 0.0 & 172.923 & 2434.157 \\ \hline
+HD 168443 c    & 2.8373 & 0.2113  & 0.0 & 64.87   & 5464.221 \\ \hline
+\end{tabular}
+\caption{Planet data for HD 168443}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{HD168443}
+\caption[]{Comparison of secular theory (blue) for HD 168443 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+\subsubsection{HD 160691}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+HD 160691 b    & 1.497   & 0.128  & 0.0 & 22.0  & 343.24   \\ \hline
+HD 160691 c    & 5.235   & 0.0985 & 0.0 & 57.6  & 576.519  \\ \hline
+HD 160691 d    & 0.09094 & 0.172  & 0.0 & 212.7 & 10.5547  \\ \hline
+HD 160691 e    & 0.9210  & 0.0666 & 0.0 & 189.6 & 165.8685 \\ \hline
+\end{tabular}
+\caption{Planet data for HD 160691}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{HD160691}
+\caption[]{Comparison of secular theory (blue) for HD 160691 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+
+\subsubsection{Kepler-30}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+Kepler-30 b    & 0.18 & 0.042  & 90.179  & -31  & 11.3 \\ \hline
+Kepler-30 c    & 0.30 & 0.0111 & 90.3227 & -49  & 640  \\ \hline
+Kepler-30 d    & 0.5  & 0.022  & 89.8406 & -163 & 23.1 \\ \hline
+\end{tabular}
+\caption{Planet data for Kepler-30}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{Kepler30}
+\caption[]{Comparison of secular theory (blue) for Kepler-30 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+\subsubsection{HD 10180}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+HD 10180 c    & 0.06412 & 0.0730 & 90.0 & 328 & 13.2  \\ \hline
+HD 10180 d    & 0.12859 & 0.131  & 90.0 & 325 & 12.0  \\ \hline
+HD 10180 e    & 0.2699  & 0.051  & 90.0 & 147 & 25.6  \\ \hline
+HD 10180 f    & 0.4929  & 0.119  & 90.0 & 327 & 22.9  \\ \hline
+HD 10180 g    & 1.427   & 0.263  & 90.0 & 327 & 23.3  \\ \hline
+HD 10180 h    & 3.381   & 0.0950 & 90.0 & 142 & 65.66 \\ \hline
+\end{tabular}
+\caption{Planet data for Kepler-30}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{HD10180}
+\caption[]{Comparison of secular theory (blue) for HD 10180 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+
+\subsubsection{HD 141399}
+
+\begin{table}[!h]
+\centering
+\small
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\rowcolor[HTML]{C0C0C0} 
+Planet & $a \ (AU)$       & $e$     & $i$   & $\varpi$  & $m \ (M _{\oplus})$ \\ \hline
+HD 141399 b    & 0.415 & 0.04  & 0.0 & -90  & 143  \\ \hline
+HD 141399 c    & 0.689 & 0.048 & 0.0 & -140 & 423  \\ \hline
+HD 141399 d    & 2.09  & 0.074 & 0.0 & -140 & 375  \\ \hline
+HD 141399 e    & 5.0   & 0.26  & 0.0 & -10  & 210  \\ \hline
+\end{tabular}
+\caption{Planet data for Kepler-30}
+\end{table}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width= \textwidth]{HD141399}
+\caption[]{Comparison of secular theory (blue) for HD 141399 with n-body simulations (black).}
+\label{}
+\end{center}
+\end{figure}
+
+\newpage
+\
  
 \newpage
 
