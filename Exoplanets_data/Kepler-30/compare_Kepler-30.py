@@ -11,21 +11,21 @@ from exoplanet_simulation import simulate
 try:
     star_sys = solar_System('star.csv', 'planets.csv')
 except:
-    star_sys = solar_System('Exoplanets_data/HD_168443/star.csv', 'Exoplanets_data/HD_168443/planets.csv')
+    star_sys = solar_System('Exoplanets_data/Kepler-30/star.csv', 'Exoplanets_data/Kepler-30/planets.csv')
 
-times = np.linspace(0, 5*10**(4), 1234)+0j
+times = np.linspace(0, 10*10**(2), 12345)+0j
     # times = np.linspace(-0, .1, 500)+0j
     # times = np.linspace(10**6, 10**10, 10000)+0j
     # times = np.logspace(6, 10, 10000)+0j
-eccs = simulate(star_sys, times, plot=False, plot_orbit=False, save=False, folder_name='Exoplanets_data/HD_168443')
+eccs = simulate(star_sys, times, plot=False, plot_orbit=False, save=False, folder_name='Exoplanets_data/Kepler-30')
 
 times = np.real(times)
 try:
-    df = pd.read_csv('Exoplanets_data/HD_168443'+'/b_nbody.csv')
+    df = pd.read_csv('Exoplanets_data/Kepler-30'+'/b_nbody.csv')
 except:
     df = pd.read_csv('b_nbody.csv')
 
-f, (ax1, ax2) = plt.subplots(2, sharex=True, figsize=(8,7))
+f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, figsize=(8,7))
 ax0 = f.add_subplot(111, frame_on=False)   # creating a single axes
 ax0.set_xticks([])
 ax0.set_yticks([])
@@ -45,7 +45,7 @@ for text in l.get_texts():
     text.set_color("white")
 
 try:
-    df = pd.read_csv('Exoplanets_data/HD_168443'+'/c_nbody.csv')
+    df = pd.read_csv('Exoplanets_data/Kepler-30'+'/c_nbody.csv')
 except:
     df = pd.read_csv('c_nbody.csv')
 t, e = np.array(df.Time), np.array(df.e)
@@ -56,6 +56,23 @@ ax2.plot(times, eccs[1], 'b')
 # plt.ylabel(r"Eccentricity")
 ax2.axis(xmin=t[0], xmax=times[-1])
 l = ax2.legend(loc='upper left',
+        ncol=3, fancybox=True, shadow=False, facecolor='black',
+        handlelength=0, handletextpad=0)
+for text in l.get_texts():
+    text.set_color("white")
+
+try:
+    df = pd.read_csv('Exoplanets_data/Kepler-30'+'/d_nbody.csv')
+except:
+    df = pd.read_csv('d_nbody.csv')
+t, e = np.array(df.Time), np.array(df.e)
+# plt.figure()
+ax3.plot(t, e, 'k--', label='d', linewidth=1)
+ax3.plot(times, eccs[2], 'b')
+# plt.xlabel('Time')
+# plt.ylabel(r"Eccentricity")
+ax3.axis(xmin=t[0], xmax=times[-1])
+l = ax3.legend(loc='upper left',
         ncol=3, fancybox=True, shadow=False, facecolor='black',
         handlelength=0, handletextpad=0)
 for text in l.get_texts():

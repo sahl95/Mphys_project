@@ -1,5 +1,4 @@
 import sys
-import os
 sys.path.append('/Users/Sahl/Desktop/University/Year_5/Mphys_project/')
 
 import numpy as np
@@ -25,14 +24,21 @@ try:
     df = pd.read_csv('Exoplanets_data/HD_12661'+'/b_nbody.csv')
 except:
     df = pd.read_csv('b_nbody.csv')
+
+f, (ax1, ax2) = plt.subplots(2, sharex=True, figsize=(8,7))
+ax0 = f.add_subplot(111, frame_on=False)   # creating a single axes
+ax0.set_xticks([])
+ax0.set_yticks([])
+ax0.set_ylabel('Eccentricity', labelpad=35)
+ax0.set_xlabel('Time (yrs)', labelpad=25)
+
 t, e = np.array(df.Time), np.array(df.e)
-plt.figure()
-plt.plot(t, e, 'k--', label='b', linewidth=1)
-plt.plot(times, eccs[0], 'b')
-plt.xlabel('Time')
-plt.ylabel(r"Eccentricity")
-plt.axis(xmin=t[0], xmax=times[-1])
-l = plt.legend(loc='upper left',
+ax1.plot(t, e, 'k--', label='b', linewidth=1)
+ax1.plot(times, eccs[0], 'b')
+# ax1.set_xlabel('Time')
+# ax1.set_ylabel(r"Eccentricity")
+ax1.axis(xmin=t[0], xmax=times[-1])
+l = ax1.legend(loc='upper left',
         ncol=3, fancybox=True, shadow=False, facecolor='black',
         handlelength=0, handletextpad=0)
 for text in l.get_texts():
@@ -43,17 +49,18 @@ try:
 except:
     df = pd.read_csv('c_nbody.csv')
 t, e = np.array(df.Time), np.array(df.e)
-plt.figure()
-plt.plot(t, e, 'k--', label='c', linewidth=1)
-plt.plot(times, eccs[1], 'b')
-plt.xlabel('Time')
-plt.ylabel(r"Eccentricity")
-plt.axis(xmin=t[0], xmax=times[-1])
-l = plt.legend(loc='upper left',
+# plt.figure()
+ax2.plot(t, e, 'k--', label='c', linewidth=1)
+ax2.plot(times, eccs[1], 'b')
+# plt.xlabel('Time')
+# plt.ylabel(r"Eccentricity")
+ax2.axis(xmin=t[0], xmax=times[-1])
+l = ax2.legend(loc='upper left',
         ncol=3, fancybox=True, shadow=False, facecolor='black',
         handlelength=0, handletextpad=0)
 for text in l.get_texts():
     text.set_color("white")
 
+f.subplots_adjust(hspace=0, top=0.97)
 plt.show()
 # print(star_sys)
