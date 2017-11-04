@@ -220,13 +220,15 @@ class test_particle():
         # print(np.min(1-ecc))
 
         plt.figure()
-        plt.semilogx(t, 5*(1-ecc))
+        plt.loglog(t, 5*(1-ecc), 'b')
         plt.xlabel('Time (yrs)')
         plt.ylabel('a(1-e)')
+        plt.axis(ymax=10, ymin=10**(-2), xmin=t[0])
         plt.show()
 
 if __name__ == "__main__":
-    t = np.linspace(0, 1*10**10, 30000)+0j
+    # t = np.linspace(0, 1*10**10, 30000)+0j
+    t = np.logspace(6, 10, 30000)+0j
 
     # folder = 'SolarSystemData/'
     folder = 'KR_paper_tests/'
@@ -249,7 +251,7 @@ if __name__ == "__main__":
     star_sys.a_particle = 5
     star_sys.n_particle = np.sqrt(G_CONST*star_sys.star_mass*M_SUN/(star_sys.a_particle*AU)**3)*365*24*3600
     star_sys.e_particle = 0.1
-    star_sys.pi_particle = np.pi
+    star_sys.pi_particle = np.pi/1.85
 
     star_sys.simulate(e, I, t)
         
