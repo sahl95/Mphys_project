@@ -34,7 +34,7 @@ class planet():
         self.l = l 
         self.Mass = Mass
         self.r = r
-        self.n = None
+        self.n = n
         self.k = k
         self.Q = Q
         self.spin = spin
