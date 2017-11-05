@@ -91,12 +91,11 @@ if __name__ == "__main__":
     star_id = 'HD_69830'
     # star_id = ''
     folder_name = folder+star_id
-    star_sys = solar_System(folder_name+'/star.csv', folder_name+'/planets.csv')
     # star_sys = solar_System(folder_name+'/Sun.csv', folder_name+'/solar_system.csv')
 
     times = np.linspace(0, 10*10**(4), 12345)+0j
 
-    a_s, e_s = np.meshgrid(np.linspace(0.3, 0.4, 3), np.linspace(0, 0.2, 3))
+    a_s, e_s = np.meshgrid(np.linspace(0.3, 0.5, 10), np.linspace(0, 0.2, 6))
     t_s = np.zeros((len(a_s), len(e_s)))
     
     pbar = tqdm(total=len(a_s)*len(e_s))
@@ -108,6 +107,7 @@ if __name__ == "__main__":
     for i in range(len(a_s)):
         for j in range(len(e_s)):
             # print(a_s[i, j], e_s[i, j])
+            star_sys = solar_System(folder_name+'/star.csv', folder_name+'/planets.csv')
 
             e_planet = e_s[i, j]
             a_planet = a_s[i, j]
@@ -124,6 +124,8 @@ if __name__ == "__main__":
             a_list.append(a_planet)
             e_list.append(e_planet)
             t_list.append(unstable_time)
+
+            del star_sys
             pbar.update()
     pbar.close()
 
