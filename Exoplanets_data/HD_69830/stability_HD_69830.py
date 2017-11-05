@@ -39,6 +39,7 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
     inclinations = star_sys.get_inclination(p_list, q_list)
 
     r_planets = []
+    x_planets, y_planets, z_planets = [], [], []
     max_axis = 0
 
     names = star_sys.get_property_all_planets('Name')
@@ -57,6 +58,9 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
     for idx in range(len(star_sys.planets)):
         xyz = star_sys.kep2cart(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
         r_planets.append(np.sqrt(xyz[0]**2+xyz[1]**2+xyz[2]**2))
+        x_planets.append(xyz[0])
+        y_planets.append(xyz[1])
+        z_planets.append(xyz[2])
 
         if plot_orbit:
             ax.plot(*xyz, '.', markersize=2, label=names[idx], zorder=-idx)
@@ -74,8 +78,11 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
         # print(np.mean(r_planets[idx]))
 
     r_planets = np.array(r_planets)
-    sep_c = np.abs(r_planets[1]-r_planets[-1])
-    sep_d = np.abs(r_planets[2]-r_planets[-1])
+    # sep_c = np.abs(r_planets[1]-r_planets[-1])
+    # sep_d = np.abs(r_planets[2]-r_planets[-1])
+
+    sep_c = np.sqrt((x_planets[1]-x_planets[-1])**2+(y_planets[1]-y_planets[-1])**2+(y_planets[1]-y_planets[-1])**2)
+    sep_d = np.sqrt((x_planets[2]-x_planets[-1])**2+(y_planets[2]-y_planets[-1])**2+(y_planets[2]-y_planets[-1])**2)
     # print(sep_d)
 
     
