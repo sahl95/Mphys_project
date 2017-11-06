@@ -2,6 +2,7 @@
 Simulates the Solar System.
 """
 import pandas as pd
+import time
 import numpy as np
 import numpy.ma as ma
 from scipy import integrate
@@ -513,7 +514,45 @@ class solar_System():
         # cos(relative angle) = (r_inner dot r_outer)/|r_inner||r_outer|
         return np.array([rx, ry, rz])
 
-    def initial_pos_vel(self, idx, time, t0=0):
+    def kep2cart_2(self, ecc, inc, h_arr, k_arr, p_arr, q_arr, time, t0, idx):
+        time = np.real(time)
+        
+        O_list = self.get_pi_or_omega(p_arr, q_arr)
+        w_list = self.get_pi_or_omega(h_arr, k_arr)-O_list
+        n = self.get_property_all_planets('n')#/(SECS_IN_YEAR)*np.pi/180
+        a = self.get_property_all_planets('a')
+        Mt = n[idx]*np.pi/180*(time-t0)
+
+        e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
+
+        E = Mt
+        f_by_dfdE = (E-e*np.sin(E)-Mt)/(1-e*np.cos(E))
+        j, maxIter, delta = 0, 30, 0.0000001
+        while (j < maxIter):
+            if np.sum((np.abs(f_by_dfdE) > delta)) == 0:
+                break
+            E = E-f_by_dfdE
+            f_by_dfdE = (E-e*np.sin(E)-Mt)/(1-e*np.cos(E))
+            j += 1
+        EA = E
+
+        nu = 2*np.arctan2(np.sqrt(1+e)*np.sin(EA/2), np.sqrt(1-e)*np.cos(EA/2))
+
+        rc = a[idx]*(1-e*np.cos(EA))
+        # print('a: {}, {}\nr_max: {}, {}\nr_min {}, {}\n'.format(a[idx], np.mean(rc), a[idx]*(1+np.max(e)), np.max(rc), a[idx]*(1-np.min(e)), np.min(rc)))
+
+        o_vec = np.array([rc*np.cos(nu), rc*np.sin(nu), 0])
+
+        rx = (o_vec[0]*(np.cos(w)*np.cos(O)-np.sin(w)*np.cos(i)*np.sin(O))-
+              o_vec[1]*(np.sin(w)*np.cos(O)+np.cos(w)*np.cos(i)*np.sin(O)))
+        ry = (o_vec[0]*(np.cos(w)*np.sin(O)+np.sin(w)*np.cos(i)*np.cos(O))+
+              o_vec[1]*(np.cos(w)*np.cos(i)*np.cos(O)-np.sin(w)*np.sin(O)))
+        rz = (o_vec[0]*(np.sin(w)*np.sin(i))+o_vec[1]*(np.cos(w)*np.sin(i)))
+        
+        # cos(relative angle) = (r_inner dot r_outer)/|r_inner||r_outer|
+        return np.array([rx, ry, rz])
+
+    def initial_pos_vel(self, idx):
         n = self.get_property_all_planets('n')
         a = self.get_property_all_planets('a')
         ecc = self.get_property_all_planets('e')
@@ -521,9 +560,7 @@ class solar_System():
         O_list = self.get_property_all_planets('Omega')*np.pi/180
         w_list = self.get_property_all_planets('pi')*np.pi/180-O_list
 
-
-        M = n[idx]*np.pi/180*(time-t0)
-
+        M = 0
         e, w, O, i = ecc[idx], w_list[idx], O_list[idx], inc[idx]
         # print('e = {:.4f}, i = {:.4f}, w = {:.4f}, O = {:.4f}'.format(e, i*180/np.pi, w*180/np.pi, O*180/np.pi))
         # print(e, i, w, O)
@@ -569,7 +606,7 @@ class solar_System():
         g, x, f, y = *np.linalg.eig(A), *np.linalg.eig(B)
         # print(A, B)
         S, beta, T, gamma = self.find_all_scaling_factor_and_phase(x, y)
-        # print(g*100*180/np.pi*3600, '\n')
+        # print(np.real(g)*180/np.pi*3600, '\n')
 
         kwargs = {'scaled_eigenvector' : S*x, 'eigenvalue' : g, 'phase' : beta,
                   't' : t}
@@ -601,12 +638,19 @@ class solar_System():
             # ax = fig.add_subplot(111)
             # ax.plot(0, 0, 'b*', markersize=3)
             for idx in range(len(self.planets)):
-                xyz = self.kep2cart(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
+                # t1 = time.clock()
+                # xyz = self.kep2cart(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
+                # t2 = time.clock()
+                xyz = self.kep2cart_2(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
+                # t3 = time.clock()
+                # print(t3-t2, t2-t1)
+
                 # ax.plot(X, Y, '.', markersize=2, label=names[idx])
                 # if idx == 2:
                 #     ax.plot(xyz[0][80:], xyz[1][80:], xyz[2][80:], '--', markersize=2, label=names[idx], zorder=-idx)
                 # else:
                 #     ax.plot(*xyz, '--', markersize=2, label=names[idx], zorder=-idx)
+                
                 ax.plot(*xyz, '.', markersize=2, label=names[idx], zorder=-idx)
                 max_axis = np.max([np.abs(np.min(xyz)), np.max(xyz)])
                 ax.set_zlim(-max_axis, max_axis)
@@ -700,11 +744,11 @@ if __name__ == "__main__":
     # star_system = solar_System(1., 1., 'SolarSystemData/'+n+'.csv')
     # t = np.linspace(-10*10**6, 10*10**6, 10000)+0j
     # t = np.linspace(0, 5*10**6, 10000)+0j
-    # t = np.linspace(-10., 0, 1006)+0j
+    t = np.linspace(-1000., 0, 1006)+0j
     # t = np.linspace(-100000, 100000, 3508)+0j
-    t = np.linspace(-2, 3, 608)+0j
+    # t = np.linspace(-2, 3, 608)+0j
     eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=True, plot=False, separate=True)
     # print(star_system)
-    # plt.show()
+    plt.show()
 
 # WHY DOES VENUS AFFECT EARTHS ORBIT AT THE BEGINNING??????
