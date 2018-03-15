@@ -74,6 +74,17 @@ def add_planet(starSystem, **planet_kwargs):
     starSystem.planets.append(planet(**planet_kwargs))
 
 def search_space(a_min, a_max, e_min, e_max, a_pts=21, e_pts=20):
+    """
+    Defines the search region.
+
+    Args:
+        a_min (float): The minimum value of the semi-major axis.
+        a_max (float): The maximum value of the semi-major axis.
+        e_min (float): The minimum value of the eccentricity.
+        e_max (float): The maximum value of the eccentricity.
+        a_pts (float): Number of values of the semi-major axis. The higher the value, the smaller the space between points.
+        e_pts (float): Number of values of the eccentricity. The higher the value, the smaller the space between points.
+    """
     a, e = np.linspace(a_min, a_max, a_pts), np.linspace(e_min, e_max, e_pts)
     a_list, e_list = [], []
     for i in range(len(e)):
@@ -114,6 +125,16 @@ def plot_stabilty(aList, eList, tList):
     # plt.savefig('Report/Images/pngs/stability_HD_69830_2.png')
 
 def run(star_id, folder, simtime, a_pts, e_pts):
+    """
+    Creates the stability map for the Earth-like planet.
+
+    Args:
+        star_id (str): The name of the star.
+        folder (str): The folder containing the names of the extrasolar systems.
+        simtime (float): End time of simulation.
+        a_pts (float): Number of values of the semi-major axis. The higher the value, the smaller the space between points.
+        e_pts (float): Number of values of the eccentricity. The higher the value, the smaller the space between points.
+    """
     a_list, e_list = search_space(a_min=0.07, a_max=1.2, e_min=0, e_max=0.2, a_pts=a_pts, e_pts=e_pts)
 
     with Pool(processes=4) as p:
@@ -127,5 +148,5 @@ def run(star_id, folder, simtime, a_pts, e_pts):
     plot_stabilty(data['a'], data['e'], data['time'])
 
 if __name__ == "__main__":
-    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=20, e_pts=20)
+    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=200, e_pts=70)
     plt.show()
