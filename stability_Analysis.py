@@ -113,12 +113,11 @@ def plot_stabilty(aList, eList, tList):
     plt.subplots_adjust(top=0.95)
     # plt.savefig('Report/Images/pngs/stability_HD_69830_2.png')
 
-def run():
-    a_pts, e_pts = 20, 20
+def run(star_id, folder, simtime, a_pts, e_pts):
     a_list, e_list = search_space(a_min=0.07, a_max=1.2, e_min=0, e_max=0.2, a_pts=a_pts, e_pts=e_pts)
 
     with Pool(processes=4) as p:
-        t_list = list(tqdm(p.imap(partial(parallel_search_stability, star_id='HD_69830', folder='Exoplanets_data/', times=np.linspace(0, 10*10**(4), 12345)+0j), zip(a_list, e_list)), total=a_pts*e_pts))
+        t_list = list(tqdm(p.imap(partial(parallel_search_stability, star_id=star_id, folder=folder, times=np.linspace(0, simtime, 12345)+0j), zip(a_list, e_list)), total=a_pts*e_pts))
     t_list = np.array(t_list)
     df = pd.DataFrame({"a": a_list, "e": e_list, "time": t_list})
     # df = pd.DataFrame(data=t_grid, columns=a, index=e)
@@ -126,7 +125,7 @@ def run():
 
     data = pd.read_csv('stability_data.csv')
     plot_stabilty(data['a'], data['e'], data['time'])
-# search_stability()
+
 if __name__ == "__main__":
-    run()
+    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=20, e_pts=20)
     plt.show()
