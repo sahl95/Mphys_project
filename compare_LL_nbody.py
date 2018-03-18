@@ -52,7 +52,7 @@ def compare_LL_nbody_eccs(t_LL, e_LL, t_nbody, e_nbody):
             text.set_color("white")
     
     f.subplots_adjust(hspace=0, top=0.97, left=0.15, right=0.96)
-    plt.savefig('Report/GJ832.pdf')
+    # plt.savefig('Report/GJ832.pdf')
 
 def find_frequency(times, dt, eccentricity):
     Fs = 1+1/dt;  # sampling rate
