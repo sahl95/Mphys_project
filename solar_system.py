@@ -22,6 +22,20 @@ from planet import planet
 # plt.rcParams['axes.labelcolor'] = 'white'
 # # plt.rcParams['savefig.facecolor']='black'
 # matplotlib.rc('axes', edgecolor='white')
+SMALL_SIZE = 10
+MEDIUM_SIZE = 13
+BIGGER_SIZE = 15
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title 
+# plt.rcParams['xtick.color'] = 'white'
+# plt.rcParams['ytick.color'] = 'white'
+# plt.rcParams['text.color'] = 'white'
+# plt.rcParams['axes.labelcolor'] = 'white'
 
 # red = (255/255, 81/255, 81/255)
 # orange = 'orange'
@@ -215,20 +229,21 @@ class solar_System():
                     alpha_jk = a[j]/a[k]
                     if alpha_jk > 1:
                         alpha_jk = alpha_jk**(-1)
-                    laplace_coeff = calculate_laplace_coeff(alpha_jk, j_laplace_coeff_jk, 3/2)
-                    # print(alpha_jk, laplace_coeff)
-                    alpha_jk_bar = np.where(a[k] < a[j], 1, alpha_jk)
-                    f_mat[j, k] = front_factor*(n[j]/4)*(m[k]/(M+m[j]))*alpha_jk*alpha_jk_bar*laplace_coeff
-
+                    laplace_coeff = calculate_laplace_coeff(alpha_jk, j_laplace_coeff_jk, 3./2.)
+                    # print(alpha_jk, j_laplace_coeff_jk, 3./2., laplace_coeff)
+                    alpha_jk_bar = np.where(a[k] < a[j], 1., alpha_jk)
+                    f_mat[j, k] = front_factor*(n[j]/4.)*(m[k]/(M+m[j]))*alpha_jk*alpha_jk_bar*laplace_coeff
+            
                 else:
                     for kk in range(n_planets):
                         if kk != j:
                             alpha_jj = a[j]/a[kk]
                             if alpha_jj > 1:
                                 alpha_jj = alpha_jj**(-1)
-                            laplace_coeff = calculate_laplace_coeff(alpha_jj, j_laplace_coeff_jj, 3/2)
-                            alpha_jj_bar = np.where(a[kk] < a[j], 1, alpha_jj)
-                            f_mat[j, k] += (1/4)*(m[kk]/(M+m[j]))*alpha_jj*alpha_jj_bar*laplace_coeff
+                            laplace_coeff = calculate_laplace_coeff(alpha_jj, j_laplace_coeff_jj, 3./2.)
+                            # print(alpha_jj, j_laplace_coeff_jj, 3./2., laplace_coeff)
+                            alpha_jj_bar = np.where(a[kk] < a[j], 1., alpha_jj)
+                            f_mat[j, k] += (1./4.)*(m[kk]/(M+m[j]))*alpha_jj*alpha_jj_bar*laplace_coeff
                     # f_mat[j, k] += J2_correction[j]
                     # if do_ecc_damp: f_mat[j, k] += 1j*ecc_damp[j]+1j*tide[j]
                     # if all(x is not None for x in self.get_property_all_planets('spin')):
@@ -236,6 +251,7 @@ class solar_System():
                     # f_mat[j, k] += gr_correction[j]
                     f_mat[j, k] *= -front_factor*(n[j])
                     # print(J2_correction[j], ecc_damp[j], gr_correction[j])
+                # print(f_mat[j, k])
         # print(f_mat[0, 0], gr_correction[0])
         return f_mat
 
@@ -357,9 +373,9 @@ class solar_System():
         kwargs = {'scaled_eigenvector' : scaled_eigenvector, 'eigenvalue' : eigenvalue, 'phase' : phase,
                   't' : t}
         if eq_id == 'h' or eq_id == 'p':
-            return self.get_h_or_p(**kwargs)
+            return self.get_h_or_p(scaled_eigenvector=scaled_eigenvector, eigenvalue=eigenvalue, phase=phase, t=t)
         if eq_id == 'k' or eq_id == 'q':
-            return self.get_k_or_q(**kwargs)
+            return self.get_k_or_q(scaled_eigenvector=scaled_eigenvector, eigenvalue=eigenvalue, phase=phase, t=t)
     
     def get_h_or_p(self, scaled_eigenvector, eigenvalue, phase, t):
         n = len(self.planets)
@@ -671,27 +687,16 @@ class solar_System():
         self.set_n()
 
         A, B = [self.frequency_matrix(matrix_id=mat_id, J2=2.2*10**(-7), J4=-4.45*10**(-9)) for mat_id in ['A', 'B']]
-        g, x, f, y = *np.linalg.eig(A), *np.linalg.eig(B)
-        # print(A, B)
-        S, beta, T, gamma = self.find_all_scaling_factor_and_phase(x, y)
-        # print(np.real(B)*180/np.pi, '\n')
-        # print(y)
-        # # print(y)
-        # print(np.real(gamma)*180/np.pi)
-        print('e = ', np.real(S*x))
-        print('I = ', np.real(T*y))
-        # print(np.real(f)*180/np.pi)
-        print()
-        # print(np.real(g)*180/np.pi*3600, '\n')
+        g, x = np.linalg.eig(A)
+        f, y = np.linalg.eig(B)
 
-        kwargs = {'scaled_eigenvector' : S*x, 'eigenvalue' : g, 'phase' : beta,
-                  't' : t}
-        h_list = self.components_of_ecc_inc(**kwargs, eq_id='h')
-        k_list = self.components_of_ecc_inc(**kwargs, eq_id='k')
-        kwargs = {'scaled_eigenvector' : T*y, 'eigenvalue' : f, 'phase' : gamma,
-                    't' : t}
-        p_list = self.components_of_ecc_inc(**kwargs, eq_id='p')#*180/np.pi
-        q_list = self.components_of_ecc_inc(**kwargs, eq_id='q')#*180/np.pi
+        S, beta, T, gamma = self.find_all_scaling_factor_and_phase(x, y)
+
+        h_list = self.components_of_ecc_inc(scaled_eigenvector=S*x, eigenvalue=g, phase=beta, t=t, eq_id='h')
+        k_list = self.components_of_ecc_inc(scaled_eigenvector=S*x, eigenvalue=g, phase=beta, t=t, eq_id='k')
+        
+        p_list = self.components_of_ecc_inc(scaled_eigenvector=T*y, eigenvalue=f, phase=gamma, t=t, eq_id='p')#*180/np.pi
+        q_list = self.components_of_ecc_inc(scaled_eigenvector=T*y, eigenvalue=f, phase=gamma, t=t, eq_id='q')#*180/np.pi
 
         eccentricities = self.get_eccentricity(h_list, k_list)
         inclinations = self.get_inclination(p_list, q_list)
@@ -728,7 +733,7 @@ class solar_System():
                 # else:
                 #     ax.plot(*xyz, '--', markersize=2, label=names[idx], zorder=-idx)
                 
-                ax.plot(*xyz, '.', markersize=2, label=names[idx], zorder=-idx)
+                ax.plot(xyz, '.', markersize=2, label=names[idx], zorder=-idx)
                 max_axis = np.max([np.abs(np.min(xyz)), np.max(xyz)])
                 ax.set_zlim(-max_axis, max_axis)
                 ax.set_ylim(-max_axis, max_axis)
@@ -740,19 +745,19 @@ class solar_System():
                 df = pd.DataFrame({"time": t ,"x" : xyz[0], "y" : xyz[1], "z" : xyz[2]})
                 df.to_csv('Animate_solar_system/'+str(idx+1)+'_'+names[idx]+'_xyz.csv', index=False)
 
-        precession_rates, xlabel = self.get_perihelion_precession_rates(A, eccentricities, h_list, k_list), 'Pericenter'
+        precession_rates, ylabel = self.get_perihelion_precession_rates(A, eccentricities, h_list, k_list), 'Pericenter'
         # precession_rates, xlabel = self.get_ascending_node_precession_rates(B, inclinations*180/np.pi, p_list, q_list), 'Ascending node'
 
         # inclinations *= 180/np.pi
         idx = 0
-        print(np.real(np.mean(precession_rates[idx]*180/np.pi*3600*100)))
-        # plot_precession_rate(t, precession_rates[idx]*180/np.pi*3600*100, xlabel+r" precession rate [${}'{}'\ 100y^{-1}$]", names[idx])
-        plot_eccentricity(t, eccentricities[idx], names[idx])
+        # print(np.real(np.mean(precession_rates[idx]*180/np.pi*3600*100)))
+        # plot_precession_rate(t, precession_rates[idx]*180/np.pi*3600*100, ylabel+r" precession rate [${}'{}'\ 100y^{-1}$]", names[idx])
+        # plot_eccentricity(t, eccentricities[idx], names[idx])
         # print(np.max(eccentricities[idx]), np.min(eccentricities[idx]), np.mean(eccentricities[idx]), '\n')
 
-        for idx in range(len(precession_rates)):
-            print('Precession rate of {} = {:.4f} arcseconds per century'.format(names[idx],
-                  np.mean(precession_rates[idx])*180/np.pi*3600*100))
+        # for idx in range(len(precession_rates)):
+        #     print('Precession rate of {} = {:.4f} arcseconds per century'.format(names[idx],
+        #           np.mean(precession_rates[idx])*180/np.pi*3600*100))
             # print('Eccentricity of {} = {:.4f}'.format(names[idx],
             #       np.mean(eccentricities[idx])))
             # print('Inclination of {} = {:.2f} degrees'.format(names[idx],
@@ -788,28 +793,29 @@ def plot_simulation_all(t_data=None, y_data=None, xlabel="", ylabel="", data_lab
     for text in l.get_texts():
         text.set_color("white")
     plt.subplots_adjust(top=0.95, right=0.95)
-    print(save_name)
-    plt.savefig('Report/{}.png'.format(save_name))
+    # print(save_name)
+    # plt.savefig('Report/{}.png'.format(save_name))
 
-def plot_precession_rate(t, precession_rate, xlabel, label):
-    bbox_props=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5')
+def plot_precession_rate(t, precession_rate, ylabel, label):
+    bbox_props=dict(facecolor='black', edgecolor='white', boxstyle='round,pad=0.5')
     # precession_rates = self.get_ascending_node_precession_rates(B, inclinations, p_list, q_list)
     fig, ax = plt.subplots(1)
-    ax.patch.set_facecolor('white')
-    ax.patch.set_alpha(0)
+    # ax.patch.set_facecolor('white')
+    # ax.patch.set_alpha(0)
     plt.plot((t/10**6), precession_rate, color='b', label=label)
     # plt.axhline(5.462, 0, 1, color='k', linestyle='--')
     plt.axhline(np.mean(precession_rate), 0, 1, color='k', linestyle='--')
     ax.text(0.75, 0.94, 'Mean precession rate = {:.2f}'.format(np.real(np.mean(precession_rate))), ha='center', va='center', transform=ax.transAxes, bbox=bbox_props)
+    ax.text(0.085, 0.94, 'Mercury', ha='center', va='center', transform=ax.transAxes, bbox=bbox_props)
     plt.xlabel('Time (Myr)')
-    plt.ylabel(xlabel)
+    plt.ylabel(ylabel, labelpad=15)
     plt.axis(xmin=t[0]/10**6, xmax=t[-1]/10**6, ymin=470, ymax=660)
-    l = plt.legend(loc='upper left', bbox_to_anchor=(0., 1.0),
-            ncol=3, fancybox=True, shadow=False, facecolor='black',
-            handlelength=0, handletextpad=0)
-    for text in l.get_texts():
-        text.set_color("white")
-    # fig.savefig('Presentation/Mercury_GR.png', facecolor='none')
+    # l = plt.legend(loc='upper left', bbox_to_anchor=(0., 1.0),
+    #         ncol=3, fancybox=True, shadow=False, facecolor='black',
+    #         handlelength=0, handletextpad=0)
+    # for text in l.get_texts():
+    #     text.set_color("white")
+    # fig.savefig('Presentation/Mercury_no_GR.pdf', facecolor='none')
 
 def plot_eccentricity(t, eccentricity, label):
     plt.figure()
@@ -829,10 +835,10 @@ if __name__ == "__main__":
     # print(n)
     star_system = solar_System('SolarSystemData/Sun.csv', 'SolarSystemData/js_system.csv')
     # star_system = solar_System(1., 1., 'SolarSystemData/'+n+'.csv')
-    t = np.linspace(-1*10**5, 1*10**5, 10000)+0j
+    # t = np.linspace(-10*10**6, 10*10**6, 10000)+0j
     # t = np.linspace(0, 5*10**6, 10000)+0j
     # t = np.linspace(0., 1001, 1001)+0j
-    # t = np.linspace(-100000, 100000, 3508)+0j
+    t = np.linspace(-100000, 100000, 3508)+0j
     # t = np.linspace(-2, 3, 608)+0j
     eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=False, plot=True, separate=False)
     # print(star_system)

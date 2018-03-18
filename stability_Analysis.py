@@ -1,5 +1,5 @@
 from functools import reduce, partial
-from  multiprocessing import Pool
+from  multiprocessing import Pool, cpu_count
 import numpy as np
 import pandas as pd
 import time
@@ -21,18 +21,19 @@ def simulate(star_sys, t):
     # star_sys.set_n()
     A, B = [star_sys.frequency_matrix(matrix_id=mat_id, J2=0, J4=0) for mat_id in ['A', 'B']]
     # print(A)
-    g, x, f, y = *np.linalg.eig(A), *np.linalg.eig(B)
+    g, x = np.linalg.eig(A)
+    f, y = np.linalg.eig(B)
     S, beta, T, gamma = star_sys.find_all_scaling_factor_and_phase(x, y)
     # print(g*100*180/np.pi*3600, '\n')
     # print(A, B)
     kwargs = {'scaled_eigenvector' : S*x, 'eigenvalue' : g, 'phase' : beta,
                 't' : t}
-    h_list = star_sys.components_of_ecc_inc(**kwargs, eq_id='h')
-    k_list = star_sys.components_of_ecc_inc(**kwargs, eq_id='k')
+    h_list = star_sys.components_of_ecc_inc(scaled_eigenvector=S*x, eigenvalue=g, phase=beta, t=t, eq_id='h')
+    k_list = star_sys.components_of_ecc_inc(scaled_eigenvector=S*x, eigenvalue=g, phase=beta, t=t, eq_id='k')
     kwargs = {'scaled_eigenvector' : T*y, 'eigenvalue' : f, 'phase' : gamma,
                 't' : t}
-    p_list = star_sys.components_of_ecc_inc(**kwargs, eq_id='p')#*180/np.pi
-    q_list = star_sys.components_of_ecc_inc(**kwargs, eq_id='q')#*180/np.pi
+    p_list = star_sys.components_of_ecc_inc(scaled_eigenvector=T*y, eigenvalue=g, phase=gamma, t=t, eq_id='p')#*180/np.pi
+    q_list = star_sys.components_of_ecc_inc(scaled_eigenvector=T*y, eigenvalue=f, phase=gamma, t=t, eq_id='q')#*180/np.pi
 
     eccentricities = star_sys.get_eccentricity(h_list, k_list)
     inclinations = star_sys.get_inclination(p_list, q_list)
@@ -93,6 +94,29 @@ def search_space(a_min, a_max, e_min, e_max, a_pts=21, e_pts=20):
             e_list.append(e[i])
     return a_list, e_list
 
+def search_stability(a_list, e_list, star_id, folder, times):
+    folder_name = folder+star_id
+    t_list = []
+    pbar = tqdm(total=len(a_list))
+    with warnings.catch_warnings():
+        for a_idx, e_idx in zip(a_list, e_list):
+            warnings.simplefilter("ignore")
+            star_sys = solar_System(folder_name+'/star.csv', folder_name+'/planets.csv')
+
+            e_planet = e_idx
+            a_planet = a_idx
+            m_planet = 0.7
+            #pylint: disable=maybe-no-member
+            pi_planet, Omega_planet, i_planet = 360*np.random.random(), 360*np.random.random(), np.random.uniform(5, 7)
+            n_planet = np.sqrt(G_CONST*star_sys.star_mass*M_SUN/(a_planet*AU)**3)*365*24*3600*180/np.pi
+            add_planet(star_sys, Name='Earth_test', e=e_planet, a=a_planet, pi=pi_planet, i=i_planet, Omega=Omega_planet, n=n_planet, Mass=m_planet)
+
+            unstable_time, unstable_pts = simulate(star_sys, times)
+            t_list.append(unstable_time)
+            pbar.update()
+        pbar.close()
+    return t_list
+
 def parallel_search_stability(searchSpace, star_id, folder, times):
     folder_name = folder+star_id
     a_idx, e_idx = searchSpace
@@ -137,16 +161,29 @@ def run(star_id, folder, simtime, a_pts, e_pts):
     """
     a_list, e_list = search_space(a_min=0.07, a_max=1.2, e_min=0, e_max=0.2, a_pts=a_pts, e_pts=e_pts)
 
-    with Pool(processes=4) as p:
-        t_list = list(tqdm(p.imap(partial(parallel_search_stability, star_id=star_id, folder=folder, times=np.linspace(0, simtime, 12345)+0j), zip(a_list, e_list)), total=a_pts*e_pts))
-    t_list = np.array(t_list)
-    df = pd.DataFrame({"a": a_list, "e": e_list, "time": t_list})
-    # df = pd.DataFrame(data=t_grid, columns=a, index=e)
-    df.to_csv('stability_data.csv')
+    try:
+        cpus = cpu_count()
+        with Pool(processes=cpus*2) as p:
+            t_list = list(tqdm(p.imap(partial(parallel_search_stability, star_id=star_id, folder=folder,
+                                            times=np.linspace(0, simtime, 12345)+0j),
+                                            zip(a_list, e_list)), total=a_pts*e_pts))
+    except:
+        p = Pool(processes=4)
+        t_list = list(tqdm(p.imap(partial(parallel_search_stability, star_id=star_id, folder=folder,
+                                            times=np.linspace(0, simtime, 12345)+0j),
+                                            zip(a_list, e_list)), total=a_pts*e_pts))
 
-    data = pd.read_csv('stability_data.csv')
-    plot_stabilty(data['a'], data['e'], data['time'])
+    t_list = np.array(t_list)
+    plot_stabilty(a_list, e_list, t_list)
+    # df = pd.DataFrame({"a": a_list, "e": e_list, "time": t_list})
+    # # df = pd.DataFrame(data=t_grid, columns=a, index=e)
+    # df.to_csv('stability_data_py27.csv')
+
+    # data = pd.read_csv('stability_data.csv')
+    # plot_stabilty(data['a'], data['e'], data['time'])
 
 if __name__ == "__main__":
-    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=200, e_pts=70)
+    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=120, e_pts=40)
+    # cpus = cpu_count()
+    # print(cpus)
     plt.show()
