@@ -1,5 +1,11 @@
 import sys
-sys.path.append('/Users/Sahl/Desktop/University/Year_5/Mphys_project/')
+import os
+split_path = os.path.dirname(__file__).split('/')[:-2]
+path = ''
+for p in split_path:
+    path += '/'+p
+path += '/'
+sys.path.append(path)
 
 import numpy as np
 import pandas as pd

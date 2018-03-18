@@ -1,20 +1,42 @@
 import sys
-sys.path.append('/Users/Sahl/Desktop/University/Year_5/Mphys_project/')
+import os
+split_path = os.path.dirname(__file__).split('/')[:-2]
+path = ''
+for p in split_path:
+    path += '/'+p
+path += '/'
+sys.path.append(path)
 
 import numpy as np
 import pandas as pd
 import glob
 import matplotlib.pyplot as plt
+import matplotlib
 from mpl_toolkits.axes_grid1 import make_axes_locatable 
 from solar_system import solar_System
 from exoplanet_simulation import simulate
+
+# plt.rcParams['xtick.color'] = 'white'
+# plt.rcParams['ytick.color'] = 'white'
+# plt.rcParams['text.color'] = 'white'
+# plt.rcParams['axes.labelcolor'] = 'white'
+# plt.rcParams['savefig.facecolor']='black'
+# matplotlib.rc('axes', edgecolor='white')
+
+# red = (255/255, 81/255, 81/255)
+# orange = 'orange'
+# blue = (0, 191/255, 255/255)
+
+red = 'r'
+orange = 'orange'
+blue = 'b'
 
 try:
     star_sys = solar_System('star.csv', 'planets.csv')
 except:
     star_sys = solar_System('Exoplanets_data/HD_69830/star.csv', 'Exoplanets_data/HD_69830/planets.csv')
 
-times = np.linspace(0, 1.6*10**(5), 1234)+0j
+times = np.linspace(0, 1.*10**(5), 1234)+0j
     # times = np.linspace(-0, .1, 500)+0j
     # times = np.linspace(10**6, 10**10, 10000)+0j
     # times = np.logspace(6, 10, 10000)+0j
@@ -33,9 +55,15 @@ ax0.set_yticks([])
 ax0.set_ylabel('Eccentricity', labelpad=45)
 ax0.set_xlabel('Time (yrs)', labelpad=25)
 
+# ax1.set_facecolor('black')
+# ax2.set_facecolor('black')
+# ax3.set_facecolor('black')
+
 t, e = np.array(df.Time), np.array(df.e)
-ax1.plot(t, e, 'k--', label='b', linewidth=1)
-ax1.plot(times, eccs[0], 'b')
+ax1.plot(t, e, 'k', label='b', linewidth=1)
+ax1.plot(t, e, 'k', linewidth=3, alpha=0.5)
+ax1.plot(times, eccs[0], color=red)
+ax1.plot(times, eccs[0], linestyle='-', color=red, linewidth=3, alpha=0.5)
 # ax1.set_xlabel('Time')
 # ax1.set_ylabel(r"Eccentricity")
 ax1.axis(xmin=t[0], xmax=times[-1])
@@ -51,8 +79,10 @@ except:
     df = pd.read_csv('c_nbody.csv')
 t, e = np.array(df.Time), np.array(df.e)
 # plt.figure()
-ax2.plot(t, e, 'k--', label='c', linewidth=1)
-ax2.plot(times, eccs[1], 'b')
+ax2.plot(t, e, 'k', label='c', linewidth=1)
+ax2.plot(t, e, 'k', linewidth=3, alpha=0.5)
+ax2.plot(times, eccs[1], color='orange')
+ax2.plot(times, eccs[1], linestyle='-', color='orange', linewidth=3, alpha=0.5)
 # plt.xlabel('Time')
 # plt.ylabel(r"Eccentricity")
 ax2.axis(xmin=t[0], xmax=times[-1])
@@ -68,8 +98,10 @@ except:
     df = pd.read_csv('d_nbody.csv')
 t, e = np.array(df.Time), np.array(df.e)
 # plt.figure()
-ax3.plot(t, e, 'k--', label='d', linewidth=1)
-ax3.plot(times, eccs[2], 'b')
+ax3.plot(t, e, 'k', label='d', linewidth=1)
+ax3.plot(t, e, 'k', linewidth=3, alpha=0.5)
+ax3.plot(times, eccs[2], color=blue)
+ax3.plot(times, eccs[2], linestyle='-', color=blue, linewidth=3, alpha=0.5)
 # plt.xlabel('Time')
 # plt.ylabel(r"Eccentricity")
 ax3.axis(xmin=t[0], xmax=times[-1])
@@ -80,5 +112,6 @@ for text in l.get_texts():
     text.set_color("white")
 
 f.subplots_adjust(hspace=0, top=0.97)
+# plt.savefig('Presentation/HD_69830.png')
 plt.show()
 # print(star_sys)

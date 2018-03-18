@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import glob
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable 
 from solar_system import solar_System
 from exoplanet_simulation import simulate
 

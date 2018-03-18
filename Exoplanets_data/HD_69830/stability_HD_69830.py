@@ -81,19 +81,12 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
     r_planets = np.array(r_planets)
     # sep_c = np.abs(r_planets[1]-r_planets[-1])
     # sep_d = np.abs(r_planets[2]-r_planets[-1])
-
-    sep_b = np.sqrt((x_planets[0]-x_planets[-1])**2+(y_planets[0]-y_planets[-1])**2+(z_planets[0]-z_planets[-1])**2)
-    sep_c = np.sqrt((x_planets[1]-x_planets[-1])**2+(y_planets[1]-y_planets[-1])**2+(z_planets[1]-z_planets[-1])**2)
-    sep_d = np.sqrt((x_planets[2]-x_planets[-1])**2+(y_planets[2]-y_planets[-1])**2+(z_planets[2]-z_planets[-1])**2)
-    # print(sep_d)
-
-    r_hill_b = ((m[0]+m[-1])/(3*M))**(1./3.)*(0.5*(a[0]+a[-1]))
-    r_hill_c = ((m[1]+m[-1])/(3*M))**(1./3.)*(0.5*(a[1]+a[-1]))
-    r_hill_d = ((m[2]+m[-1])/(3*M))**(1./3.)*(0.5*(a[2]+a[-1]))
-    # print(2*np.sqrt(3)*((m[2]+m[1])/(3*M))**(1./3.)*(0.5*(a[2]+a[1])))
-    # print(r_hill_d, sep_d)
-
-    masks = [sep_b < 2*np.sqrt(3)*r_hill_b, sep_c < 2*np.sqrt(3)*r_hill_c, sep_d < 2*np.sqrt(3)*r_hill_d]
+    masks = []
+    for i in range(len(star_sys.planets)-1):
+        sep = np.sqrt((x_planets[i]-x_planets[-1])**2+(y_planets[i]-y_planets[-1])**2+(z_planets[i]-z_planets[-1])**2)
+        r_hill = ((m[i]+m[-1])/(3*M))**(1./3.)*(0.5*(a[i]+a[-1]))
+        # print(2*np.sqrt(3)*r_hill)
+        masks.append(sep < 2*np.sqrt(3)*r_hill)
     #pylint: disable=maybe-no-member
     unstable = reduce(np.logical_or, masks)
     # print(np.sum(unstable))
@@ -118,14 +111,14 @@ if __name__ == "__main__":
 
     times = np.linspace(0, 10*10**(4), 12345)+0j
 
-    a, e = np.linspace(0.07, 1.2, 120), np.linspace(0, 0.4, 60)
+    a, e = np.linspace(0.07, 1.2, 120), np.linspace(0, 0.2, 30)
     a_grid, e_grid = np.meshgrid(a, e)
     # print(a_grid.shape, e_grid.shape)
     t_grid = np.zeros((a_grid.shape[0], a_grid.shape[1]))
     unstable_grid = np.zeros((a_grid.shape[0], a_grid.shape[1]))
     # print(np.shape(t_grid))
     total = float(a_grid.shape[0]*a_grid.shape[1])
-    pbar = tqdm(total=total)
+    # pbar = tqdm(total=total)
 
     a_list = []
     e_list = []
@@ -140,7 +133,7 @@ if __name__ == "__main__":
 
                 e_planet = e_grid[i, j]
                 a_planet = a_grid[i, j]
-                m_planet = 0.3
+                m_planet = 0.7
                 #pylint: disable=maybe-no-member
                 pi_planet, Omega_planet, i_planet = 360*np.random.random(), 360*np.random.random(), np.random.uniform(5, 7)
                 n_planet = np.sqrt(G_CONST*star_sys.star_mass*M_SUN/(a_planet*AU)**3)*365*24*3600*180/np.pi
@@ -158,23 +151,23 @@ if __name__ == "__main__":
 
                 del star_sys
                 # print(1/(len(a_grid)*len(e_grid)), 1/5)
-                pbar.update()
-    pbar.close()
+                # pbar.update()
+    # pbar.close()
     t_grid = t_grid[::-1, :]
     # df = pd.DataFrame({"a": a_list, "e": e_list, "time": t_list})
-    df = pd.DataFrame(data=t_grid, columns=a, index=e)
-    df.to_csv(folder_name+'/stability_times_m0.3.csv')
-    df = pd.DataFrame(data=unstable_grid, columns=a, index=e)
-    df.to_csv(folder_name+'/stability_pts_m0.3.csv')
+    # df = pd.DataFrame(data=t_grid, columns=a, index=e)
+    # df.to_csv(folder_name+'/stability_times_m0.7.csv')
+    # df = pd.DataFrame(data=unstable_grid, columns=a, index=e)
+    # df.to_csv(folder_name+'/stability_pts_m0.7.csv')
 
     fig, ax = plt.subplots()
-    im = plt.imshow(t_grid, extent=(np.amin(a_list), np.amax(a_list), np.amin(e_list), np.amax(e_list)), vmin=0, vmax=np.real(times[-1]))
+    im = plt.imshow(t_grid, extent=(np.amin(a_list), np.amax(a_list), np.amin(e_list), np.amax(e_list)), cmap='inferno', aspect='auto', vmin=0, vmax=np.real(times[-1]))
     plt.xlabel('a (AU)')
     plt.ylabel('e')
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
-    fig.colorbar(im, cax=cax, orientation='vertical',label='Time')
-    plt.savefig(folder_name+'/stability_m0.3.png')
+    cax = divider.append_axes('top', size='5%', pad=0.55)
+    fig.colorbar(im, cax=cax, orientation='horizontal',label='Time (years)')
+    plt.savefig(folder_name+'/stability_m0.7.png')
 
     # plt.show()
     # print(star_sys)

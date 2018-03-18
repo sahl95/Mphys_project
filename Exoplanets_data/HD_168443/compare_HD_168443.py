@@ -13,7 +13,7 @@ try:
 except:
     star_sys = solar_System('Exoplanets_data/HD_168443/star.csv', 'Exoplanets_data/HD_168443/planets.csv')
 
-times = np.linspace(0, 5*10**(4), 1234)+0j
+times = np.linspace(0, 1*10**(5), 1234)+0j
     # times = np.linspace(-0, .1, 500)+0j
     # times = np.linspace(10**6, 10**10, 10000)+0j
     # times = np.logspace(6, 10, 10000)+0j
