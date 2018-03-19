@@ -135,7 +135,7 @@ def parallel_search_stability(searchSpace, star_id, folder, times):
         unstable_time, unstable_pts = simulate(star_sys, times)
     return unstable_time
 
-def plot_stabilty(aList, eList, tList):
+def plot_stability_alternate(aList, eList, tList):
     triang = tri.Triangulation(aList, eList)
     fig, ax = plt.subplots()
     im = plt.tripcolor(aList, eList, tList, cmap='RdYlGn', shading='gouraud')
@@ -147,6 +147,22 @@ def plot_stabilty(aList, eList, tList):
     fig.colorbar(im, cax=cax, orientation='horizontal',label='Time (years)')
     plt.subplots_adjust(top=0.95)
     # plt.savefig('Report/Images/pngs/stability_HD_69830_2.png')
+
+def plot_stability(a_values, e_values, t_values):
+    a_pts, e_pts = len(np.unique(a_values)), len(np.unique(e_values))
+    try:
+        t_values = t_values.values.reshape(e_pts, a_pts)
+    except:
+        t_values = t_values.reshape(e_pts, a_pts)
+
+    fig, ax = plt.subplots()
+    im = plt.imshow(t_values, extent=(np.min(a_values), np.max(a_values), np.min(e_values), np.max(e_values)),
+                    cmap='RdYlGn', aspect='auto', origin='lower')
+    plt.xlabel('a (AU)')
+    plt.ylabel('e')
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes('top', size='5%', pad=0.55)
+    fig.colorbar(im, cax=cax, orientation='horizontal',label='Time (years)')
 
 def run(star_id, folder, simtime, a_pts, e_pts):
     """
@@ -174,16 +190,25 @@ def run(star_id, folder, simtime, a_pts, e_pts):
                                             zip(a_list, e_list)), total=a_pts*e_pts))
 
     t_list = np.array(t_list)
-    plot_stabilty(a_list, e_list, t_list)
-    # df = pd.DataFrame({"a": a_list, "e": e_list, "time": t_list})
+    plot_stability(a_list, e_list, t_list)
+    df = pd.DataFrame({"a": a_list, "e": e_list, "time": t_list})
     # # df = pd.DataFrame(data=t_grid, columns=a, index=e)
-    # df.to_csv('stability_data_py27.csv')
+    df.to_csv('stability_data_py27.csv')
 
     # data = pd.read_csv('stability_data.csv')
     # plot_stabilty(data['a'], data['e'], data['time'])
 
 if __name__ == "__main__":
-    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=120, e_pts=40)
+    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=20, e_pts=20)
     # cpus = cpu_count()
     # print(cpus)
+
+    # df = pd.read_csv('stability_data_py27.csv')
+    # a, e, t = df['a'], df['e'], df['time']
+    # a_pts, e_pts = len(np.unique(a)), len(np.unique(e))
+    # t = t.values.reshape(e_pts, a_pts)
+    # t = t[::-1, :]
+    # plot_stability(df['a'], df['e'], df['time'])
+    
+
     plt.show()
