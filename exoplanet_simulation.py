@@ -62,8 +62,8 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
         # ax = fig.add_subplot(111)
         # ax.plot(0, 0, 'b*', markersize=3)
         
-        print("PLANET DATA FOR big.in")
-        print("----------------------")
+        n_body_string = "PLANET DATA FOR big.in\n"+"----------------------\n"
+
         r_planets = []
         x_planets, y_planets, z_planets = [], [], []   
         max_axis = 0
@@ -72,17 +72,15 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
             prefix = ''
             for s in star_id.split('_'):
                 prefix += s
-            
-            # print('{}{}  m=  {} '.format(prefix, names[idx], star_sys.planets[idx].Mass*M_EARTH/M_SUN), end='')
-            # print(' r=   2.0000000000000000      d=   3.0000000000000000')
+
             xyz_init, uvw_init = star_sys.initial_pos_vel(idx)
-            # xyz_init -= xyz_center
-            # uvw_init -= uvw_center
-            # print(uvw_init)
             xyz = star_sys.kep2cart_2(eccentricities, inclinations, h_list, k_list, p_list, q_list, t, 0, idx)
-            # print(' {} {} {}'.format(*xyz_init))#, np.sqrt(xyz_init[0]**2+xyz_init[1]**2+xyz_init[2]**2)))
-            # print(' {} {} {}'.format(*uvw_init))#, np.sqrt(uvw_init[0]**2+uvw_init[1]**2+uvw_init[2]**2)))
-            # print(' 0.0000000000000000        0.0000000000000000        0.0000000000000000')
+            
+            n_body_string += '{}{}  m=  {} '.format(prefix, names[idx], star_sys.planets[idx].Mass*M_EARTH/M_SUN)
+            n_body_string += ' r=   2.0000000000000000      d=   3.0000000000000000\n'
+            n_body_string += ' {} {} {}\n'.format(xyz_init[0], xyz_init[1], xyz_init[2])
+            n_body_string += ' {} {} {}\n'.format(uvw_init[0], uvw_init[1], uvw_init[2])
+            n_body_string += ' 0.0000000000000000        0.0000000000000000        0.0000000000000000\n'
 
             # print('x = {:.4f}, y = {:.4f}, z = {:.4f} | r = {:.4f}'.format(*xyz[:, 0], np.sqrt(xyz[0, 0]**2+xyz[1, 0]**2+xyz[2, 0]**2)))
 
@@ -91,7 +89,7 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
             y_planets.append(xyz[1])
             z_planets.append(xyz[2])
 
-            ax.plot(xyz, '.', markersize=2, label=names[idx], zorder=-idx)
+            ax.plot(xyz[0], xyz[1], xyz[2], '.', markersize=2, label=names[idx], zorder=-idx)
             # print(xyz[:, 0])
             if np.max([np.abs(np.min(xyz)), np.max(xyz)]) > max_axis:
                 max_axis = np.max([np.abs(np.min(xyz)), np.max(xyz)])
@@ -106,6 +104,8 @@ def simulate(star_sys, t, plot_orbit=False, plot=False, separate=True, save=Fals
             if save:
                 df = pd.DataFrame({"time": t ,"x" : xyz[0], "y" : xyz[1], "z" : xyz[2]})
                 df.to_csv(folder_name+'/'+names[idx]+'_xyz.csv', index=False)
+
+        print(n_body_string)
 
     # sep_b = np.sqrt((x_planets[0]-x_planets[-1])**2+(y_planets[0]-y_planets[-1])**2+(z_planets[0]-z_planets[-1])**2)
     # sep_c = np.sqrt((x_planets[1]-x_planets[-1])**2+(y_planets[1]-y_planets[-1])**2+(z_planets[1]-z_planets[-1])**2)
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     # times = np.linspace(-3, 3, 1513)+0j
     # times = np.linspace(10**6, 10**10, 10000)+0j
     # times = np.logspace(6, 10, 10000)+0j
-    eccs = simulate(star_sys, times, plot=True, plot_orbit=True, save=False, folder_name=folder_name)
+    eccs = simulate(star_sys, times, plot=True, plot_orbit=False, save=False, folder_name=folder_name)
     # print('Time taken: {}s'.format(time.clock()-t1))
 
     print("\nSTELLAR DATA FOR param.in")

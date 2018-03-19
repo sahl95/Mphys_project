@@ -842,6 +842,6 @@ if __name__ == "__main__":
     # t = np.linspace(-2, 3, 608)+0j
     eccentricities, inclinations = star_system.simulate(t=t, plot_orbit=False, plot=True, separate=False)
     # print(star_system)
-    # plt.show()
+    plt.show()
 
 # WHY DOES VENUS AFFECT EARTHS ORBIT AT THE BEGINNING??????
