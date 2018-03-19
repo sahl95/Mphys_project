@@ -56,10 +56,12 @@ def simulate(star_sys, t):
         z_planets.append(xyz[2])
 
     masks = []
-    for i in range(len(star_sys.planets)-1):
-        sep = np.sqrt((x_planets[i]-x_planets[-1])**2+(y_planets[i]-y_planets[-1])**2+(z_planets[i]-z_planets[-1])**2)
-        r_hill = ((m[i]+m[-1])/(3*M))**(1./3.)*(0.5*(a[i]+a[-1]))
-        masks.append(sep < 2*np.sqrt(3)*r_hill)
+    for i in range(len(star_sys.planets)):
+        for j in range(len(star_sys.planets)):
+            if i != j:
+                sep = np.sqrt((x_planets[i]-x_planets[j])**2+(y_planets[i]-y_planets[j])**2+(z_planets[i]-z_planets[j])**2)
+                r_hill = ((m[i]+m[j])/(3*M))**(1./3.)*(0.5*(a[i]+a[j]))
+                masks.append(sep < 2*np.sqrt(3)*r_hill)
     #pylint: disable=maybe-no-member
     unstable = reduce(np.logical_or, masks)
 
@@ -193,13 +195,13 @@ def run(star_id, folder, simtime, a_pts, e_pts):
     plot_stability(a_list, e_list, t_list)
     df = pd.DataFrame({"a": a_list, "e": e_list, "time": t_list})
     # # df = pd.DataFrame(data=t_grid, columns=a, index=e)
-    df.to_csv('stability_data_py27.csv')
+    # df.to_csv('stability_data_py36.csv')
 
     # data = pd.read_csv('stability_data.csv')
     # plot_stabilty(data['a'], data['e'], data['time'])
 
 if __name__ == "__main__":
-    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=20, e_pts=20)
+    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=100, e_pts=50)
     # cpus = cpu_count()
     # print(cpus)
 
