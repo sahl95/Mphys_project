@@ -1,6 +1,7 @@
 from functools import reduce, partial
 from  multiprocessing import Pool, cpu_count
 import numpy as np
+import scipy.interpolate
 import pandas as pd
 import time
 from tqdm import *
@@ -186,7 +187,8 @@ def run(star_id, folder, simtime, a_pts, e_pts):
                                             times=np.linspace(0, simtime, 12345)+0j),
                                             zip(a_list, e_list)), total=a_pts*e_pts))
     except:
-        p = Pool(processes=4)
+        cpus = cpu_count()
+        p = Pool(processes=cpus*2)
         t_list = list(tqdm(p.imap(partial(parallel_search_stability, star_id=star_id, folder=folder,
                                             times=np.linspace(0, simtime, 12345)+0j),
                                             zip(a_list, e_list)), total=a_pts*e_pts))
@@ -195,22 +197,44 @@ def run(star_id, folder, simtime, a_pts, e_pts):
     plot_stability(a_list, e_list, t_list)
     df = pd.DataFrame({"a": a_list, "e": e_list, "time": t_list})
     # # df = pd.DataFrame(data=t_grid, columns=a, index=e)
-    # df.to_csv('stability_data_py36.csv')
+    df.to_csv('stability_data_2root3_Rhill_2000x2000.csv')
 
     # data = pd.read_csv('stability_data.csv')
     # plot_stabilty(data['a'], data['e'], data['time'])
 
 if __name__ == "__main__":
-    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=100, e_pts=50)
+    run(star_id='HD_69830', folder='Exoplanets_data/', simtime=10**5, a_pts=2000, e_pts=2000)
     # cpus = cpu_count()
     # print(cpus)
 
-    # df = pd.read_csv('stability_data_py27.csv')
+    # df = pd.read_csv('stability_data_2root3_Rhill_120x30.csv')
     # a, e, t = df['a'], df['e'], df['time']
+    # plot_stability(a, e, t)
     # a_pts, e_pts = len(np.unique(a)), len(np.unique(e))
     # t = t.values.reshape(e_pts, a_pts)
-    # t = t[::-1, :]
+    # a, e = np.linspace(np.min(a), np.max(a), a_pts), np.linspace(np.min(e), np.max(e), e_pts)
+    # a, e = np.meshgrid(a, e)
+    # t = np.array(t)
+    # # t = t[::-1, :]
+
+    # rbf = scipy.interpolate.Rbf(a, e, t, function='linear')
+
+    # n = 335
+    # xi, yi = np.linspace(np.min(a), np.max(a), n), np.linspace(np.min(e), np.max(e), n)
+    # xi, yi = np.meshgrid(xi, yi)
+    # zi = rbf(xi, yi)
+
     # plot_stability(df['a'], df['e'], df['time'])
+    
+    # fig, ax = plt.subplots()
+    # im = plt.imshow(zi, extent=(np.min(a), np.max(a), np.min(e), np.max(e)), cmap='RdYlGn', aspect='auto', origin='lower')
+    # plt.xlabel('a (AU)')
+    # plt.ylabel('e')
+    # divider = make_axes_locatable(ax)
+    # cax = divider.append_axes('top', size='5%', pad=0.55)
+    # fig.colorbar(im, cax=cax, orientation='horizontal',label='Time (years)')
+
+    # plt.savefig('Report/stability_HD_69830_120x30.pdf', transparent=True)
     
 
     plt.show()
